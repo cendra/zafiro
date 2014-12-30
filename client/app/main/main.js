@@ -7,5 +7,9 @@ angular.module('zafiroApp')
         url: '/',
         templateUrl: 'app/main/main.html',
         controller: 'MainCtrl'
-      });
+      }).state('main.algo', {
+      template: '<div>Algo</div>',
+      url: 'algo'
+    });
+
   });

@@ -4,8 +4,9 @@ angular.module('zafiroApp')
   .controller('NavbarCtrl', function ($scope, $location) {
     $scope.menu = [{
       'title': 'Home',
-      'link': '/'
-    }];
+      'link': 'main'
+    },
+    {'title': 'algo', 'link':'main.algo'}];
 
     $scope.isCollapsed = true;
 

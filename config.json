@@ -1,0 +1,7 @@
+{
+	"appsPath": "apps",
+	"auth": {
+		"loginUrl": "/yuli/login",
+		"returnParam": "returnUrl"
+	}
+}
