@@ -31,7 +31,8 @@ module.exports = function (grunt) {
     yeoman: {
       // configurable paths
       client: require('./bower.json').appPath || 'client',
-      dist: 'dist'
+      dist: 'dist',
+      apps: 'apps'
     },
     express: {
       options: {
@@ -87,6 +88,7 @@ module.exports = function (grunt) {
       },
       sass: {
         files: [
+          '<%= yeoman.apps %>/**/*.{scss,sass}',
           '<%= yeoman.client %>/{app,components}/**/*.{scss,sass}'],
         tasks: ['sass', 'autoprefixer']
       },
@@ -95,10 +97,16 @@ module.exports = function (grunt) {
       },
       livereload: {
         files: [
+          '<%= yeoman.apps %>/**/*.css',
+          '<%= yeoman.apps %>/**/*.html',
+          '<%= yeoman.apps %>/**/*.js',
+          '!<%= yeoman.apps %>/**/*.spec.js',
+          '!<%= yeoman.apps %>/**/*.mock.js',
+          '<%= yeoman.apps %>/assets/images/{,*//*}*.{png,jpg,jpeg,gif,webp,svg}',
           '{.tmp,<%= yeoman.client %>}/{app,components}/**/*.css',
           '{.tmp,<%= yeoman.client %>}/{app,components}/**/*.html',
           '{.tmp,<%= yeoman.client %>}/{app,components}/**/*.js',
-          '!{.tmp,<%= yeoman.client %>}{app,components}/**/*.spec.js',
+          '!{.tmp,<%= yeoman.client %>}/{app,components}/**/*.spec.js',
           '!{.tmp,<%= yeoman.client %>}/{app,components}/**/*.mock.js',
           '<%= yeoman.client %>/assets/images/{,*//*}*.{png,jpg,jpeg,gif,webp,svg}'
         ],
@@ -468,6 +476,7 @@ module.exports = function (grunt) {
       server: {
         options: {
           loadPath: [
+	    '<%= yeoman.apps %>',
             '<%= yeoman.client %>/bower_components',
             '<%= yeoman.client %>/app',
             '<%= yeoman.client %>/components'
