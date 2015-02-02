@@ -95,6 +95,14 @@ module.exports = function (grunt) {
       gruntfile: {
         files: ['Gruntfile.js']
       },
+      npm: {
+        files: ['package.json'],
+        tasks: ['express:dev', 'wait'],
+        options: {
+          livereload: true,
+          nospawn: true //Without this option specified express won't be reloaded
+        }
+      },
       livereload: {
         files: [
           '<%= yeoman.apps %>/**/*.css',
