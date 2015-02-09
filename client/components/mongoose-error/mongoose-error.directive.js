@@ -3,7 +3,7 @@
 /**
  * Removes server error when user updates input
  */
-angular.module('zafiroApp')
+angular.module('zafiro')
   .directive('mongooseError', function () {
     return {
       restrict: 'A',

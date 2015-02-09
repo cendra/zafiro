@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('zafiroApp')
+angular.module('zafiro')
   .controller('NavbarCtrl', function ($scope, $location) {
     $scope.menu = [{
       'title': 'Home',

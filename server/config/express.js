@@ -14,6 +14,8 @@ var cookieParser = require('cookie-parser');
 var errorHandler = require('errorhandler');
 var path = require('path');
 var config = require('./environment');
+var fs = require('fs');
+var appsPath = path.join(config.root, 'apps');
 
 module.exports = function(app) {
   var env = app.get('env');
@@ -42,5 +44,15 @@ module.exports = function(app) {
     app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
+
+  app.use('/app/:app', function(req, res, next) {
+    try {
+      var stat = fs.statSync(path.join(appsPath, req.params.app));
+      if(!stat.isDirectory()) throw 'No es directorio';
+      express.static(path.join(appsPath, req.params.app))(req, res, next);
+    } catch(e) {
+      next();
+    }
+  });
 
 };

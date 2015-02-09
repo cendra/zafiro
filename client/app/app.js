@@ -1,13 +1,15 @@
 'use strict';
 
-angular.module('zafiroApp', [
+angular.module('zafiro', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
   'btford.socket-io',
   'ui.router',
   'ct.ui.router.extras',
-  'ui.bootstrap'
+  'ui.bootstrap',
+  'oc.lazyLoad',
+  'toasty'
 ])
   .config(function ($stateProvider, $urlRouterProvider, $locationProvider, $futureStateProvider) {
     $urlRouterProvider
@@ -26,6 +28,7 @@ angular.module('zafiroApp', [
     $stateProvider
       .state('root', {
         url: '/',
+        template: '<div ui-view class="container"></div>',
         abstract: true
       })
       .state('error', {
@@ -48,45 +51,52 @@ angular.module('zafiroApp', [
 
     $futureStateProvider.stateFactory('module', function($http, futureState) {
       return $http.get('/api/zafiro/module/'+futureState.name).then(function(resp) {
-        return processRoutes(resp.data);
+        processRoutes(resp.data);
       });
     });
 
-    function processRoutes(route, parentState) {
+    function processRoutes(route, parentState, appUrl) {
       if(!parentState) {
         parentState = 'root';
+       
+        appUrl = '/app/'+route.name+'/';
+        
         (route.url=='/'||!route.url)&&(route.url=route.name);
+        route.abstract = true;
+        if(!route.template&&!route.templateUrl) route.template = "<div ui-view></div>";
       }
 
       var children = route.children||[];
       var files = route.files||[];
-      route.templateUrl&&files.push(route.templateUrl);
-      delete route.children;
-      delete route.templateUrl;
-  
-      var state = $.extend(true, {}, route, {
-        name: parentState+'.'+route.name,
-        children: []
+      //route.templateUrl&&files.push(route.templateUrl);
+      files = files.map(function(filePath) {
+        return (filePath[0]=='/')?filePath:appUrl+filePath;
       });
+      route.templateUrl&&(route.templateUrl=appUrl+route.templateUrl);
+      delete route.children;
+      delete route.files;
 
+      var name = route.name;
+      delete route.name;
+  
       if(files.length) {
-        if(!state.resolve) {
-          state.resolve = {};
+        if(!route.resolve) {
+          route.resolve = {};
         }
 
-        state.resolve[state.name] = ['$ocLazyLoad', function($ocLazyLoad) {
-          $ocLazyLoad.load({
-            name: state.name.split('.')[1]+'App',
+        route.resolve[name+'Resolve'] = function($ocLazyLoad) {
+          return $ocLazyLoad.load({
+            name: 'zafiro',
             files: files
           });
-        }]; 
+        }; 
       }
+       
+      $stateProvider.state(parentState+'.'+name, route);
 
       children.forEach(function(child) {
-        state.children.push(processRoutes(child, state.name));
-      })
-       
-      return state;
+        processRoutes(child, parentState+'.'+name, appUrl);
+      });
     }
 
     $locationProvider.html5Mode(true);

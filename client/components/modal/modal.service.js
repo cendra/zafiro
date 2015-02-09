@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('zafiroApp')
+angular.module('zafiro')
   .factory('Modal', function ($rootScope, $modal) {
     /**
      * Opens a modal

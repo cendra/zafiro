@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('zafiroApp')
+angular.module('zafiro')
   .factory('User', function ($resource) {
     return $resource('/api/users/:id/:controller', {
       id: '@_id'

@@ -22,12 +22,7 @@ router.get('/module', function (req, res, next) {
 	fs.readdir(appsPath, function(err, modules) {
 		if(err) return next(err);
 		async.map(modules, function(module, cb) {
-			console.log(config.root);
-			console.log(appsPath+' '+module);
-			console.log(path.join(appsPath, module, 'module.json'));
 			fs.stat(path.join(appsPath, module, 'module.json'), function(err, stat) {
-				console.log(err);
-				console.log(stat+' '+((stat&&stat.isFile())||''));
 				if(!err && stat.isFile()) {
 					return cb(null, {type: 'module', name: module, url: module, parent: 'root'});
 				}
@@ -48,7 +43,8 @@ router.get('/module/:module', function(req, res, next) {
 			return next(err);
 		}
 		if(!module.routes) return next('No routes defined for module');
-		module.routes.files = module.files||[];
+		module.routes.files = module.routes.files||[];
+		module.routes.files.concat(module.files||[]);
 		module.routes.name = req.params.module;
 		res.json(module.routes);
 	});
