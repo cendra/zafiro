@@ -51,7 +51,7 @@ angular.module('zafiro', [
 
     $futureStateProvider.stateFactory('module', function($http, futureState) {
       return $http.get('/api/zafiro/module/'+futureState.name).then(function(resp) {
-        processRoutes(resp.data);
+        processRoutes(resp.data.routes);
       });
     });
 

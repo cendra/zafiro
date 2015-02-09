@@ -1,7 +1,7 @@
 'use strict';
 
 var express = require('express');
-var controller = require('./zafiro.controller');
+//var controller = require('./zafiro.controller');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
@@ -11,13 +11,6 @@ var extend = require('extend');
 
 var router = express.Router();
 
-/*router.get('/', controller.index);
-router.get('/:id', controller.show);
-router.post('/', controller.create);
-router.put('/:id', controller.update);
-router.patch('/:id', controller.update);
-router.delete('/:id', controller.destroy);
-*/
 router.get('/module', function (req, res, next) {
 	fs.readdir(appsPath, function(err, modules) {
 		if(err) return next(err);
@@ -46,7 +39,7 @@ router.get('/module/:module', function(req, res, next) {
 		module.routes.files = module.routes.files||[];
 		module.routes.files.concat(module.files||[]);
 		module.routes.name = req.params.module;
-		res.json(module.routes);
+		res.json(module);
 	});
 });
 
