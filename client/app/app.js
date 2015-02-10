@@ -4,6 +4,7 @@ var zf = angular.module('zafiro', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
+  'ngAnimate',
   'btford.socket-io',
   'ui.router',
   'ct.ui.router.extras',
@@ -18,18 +19,23 @@ var zf = angular.module('zafiro', [
         var host = $location.host().split('.')[0];
         var path = $location.path().split('/')[1];
 
-        if(host != path && path != defaultUrl) {
-          return '/'+host+$location.url();
-        } else {
-          return defaultUrl||'/error/app';
-        }
 
+        if(host != path) {
+          return '/'+host+$location.url();
+        } else if(new RegExp('^/'+path+'/?$').test($location.path())){
+          return '/error/app';
+        } else {
+          return '/error/page';
+        }
       });
 
     $stateProvider
       .state('root', {
         url: '/',
-        template: '<div ui-view class="container"></div>',
+        controller: function($scope, $rootScope) {
+
+        },
+        template: '<div ui-view class="zafiroRoot container" ng-class="{moveLeft:move==\'left\'}"></div><button ng-click="move=\'left\'">Left</button>',
         abstract: true
       })
       .state('error', {
@@ -40,6 +46,10 @@ var zf = angular.module('zafiro', [
       .state('error.appNotFound', {
         url: '/app',
         template: '<h3>Application not found</h3><a ui-sref="root.test">n</a>'
+      })
+      .state('error.pageNotFound', {
+        url: '/page',
+        template: '<h3>Page not found</h3><a ui-sref="root.test">n</a>'
       });
 
     $futureStateProvider.addResolve(function($http) {
@@ -210,6 +220,37 @@ var zf = angular.module('zafiro', [
       }
     }];
 
+  })
+  .animation('.zafiroRoot', function() {
+    return {
+      addClass: function(element, className, done) {
+        if(className == 'moveLeft' || className == 'moveRight') {
+          //if(element.hasClass('active')) {
+            element.animate({
+              transform: "scale(0.75)",
+              border: "1px solid gray"
+            }, 300, 'swing', function() {
+              element.animate({
+                left: className=='moveLeft'?'-1200px':'2400px'
+              }, 700, 'linear', done);
+            });
+            
+         // }
+        }
+        return function(cancel) {
+          if(cancel) element.stop();
+        }
+      },
+      removeClass: function(element, className, done) {
+        if(className == 'moveLeft' || className == 'moveRight') {
+
+        }
+        return function(cancel) {
+          if(cancel) element.stop();
+        }
+
+      }
+    }
   });
 
 ['src', 'href'].forEach(function(refAttr) {
@@ -230,3 +271,5 @@ var zf = angular.module('zafiro', [
     }
   }]);  
 });
+
+zf.directive('zfSref', ['$location'])
