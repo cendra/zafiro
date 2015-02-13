@@ -15,7 +15,7 @@ var fs = require('fs');
 var path = require('path');
 
 // Connect to database
-mongoose.connect(config.mongo.uri, config.mongo.options);
+//mongoose.connect(config.mongo.uri, config.mongo.options);
 
 // Populate DB with sample data
 if(config.seedDB) { require('./config/seed'); }
