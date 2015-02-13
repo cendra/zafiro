@@ -8,10 +8,11 @@ var zf = angular.module('zafiro', [
   'btford.socket-io',
   'ui.router',
   'ct.ui.router.extras',
-  'ui.bootstrap',
   'oc.lazyLoad',
   'toasty',
-  'angularSoap'
+  'angularSoap',
+  'ngMaterial',
+  'ngMdIcons'
 ])
   .config(function ($stateProvider, $urlRouterProvider, $locationProvider, $futureStateProvider, defaultUrl) {
     $urlRouterProvider
@@ -32,10 +33,7 @@ var zf = angular.module('zafiro', [
     $stateProvider
       .state('root', {
         url: '/',
-        controller: function($scope, $rootScope) {
-
-        },
-        template: '<div ui-view class="zafiroRoot container" ng-class="{moveLeft:move==\'left\'}"></div><button ng-click="move=\'left\'">Left</button>',
+        template: '<div ui-view class="zafiroRoot container" ng-class="{moveLeft:move==\'left\',moveRight:move==\'right\'}"></div>',
         abstract: true
       })
       .state('error', {
@@ -45,11 +43,11 @@ var zf = angular.module('zafiro', [
       })
       .state('error.appNotFound', {
         url: '/app',
-        template: '<h3>Application not found</h3><a ui-sref="root.test">n</a>'
+        template: '<h3>Application not found</h3><a zf-sref="(yuli)comdoc">n</a>'
       })
       .state('error.pageNotFound', {
         url: '/page',
-        template: '<h3>Page not found</h3><a ui-sref="root.test">n</a>'
+        template: '<h3>Page not found</h3><a zf-sref="(test)">n</a>'
       });
 
     $futureStateProvider.addResolve(function($http) {
@@ -60,9 +58,10 @@ var zf = angular.module('zafiro', [
       });
     });
 
-    $futureStateProvider.stateFactory('module', function($http, futureState) {
+    $futureStateProvider.stateFactory('module', function($http, futureState, $rootScope) {
       return $http.get('/api/zafiro/module/'+futureState.name).then(function(resp) {
-        processRoutes(resp.data.routes);
+        processRoutes(angular.copy(resp.data.routes));
+        $rootScope.$broadcast('zfAppRouteLoaded', futureState.name, resp.data);
       });
     });
 
@@ -111,6 +110,67 @@ var zf = angular.module('zafiro', [
     }
 
     $locationProvider.html5Mode(true);
+  })
+  .controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location) {
+    
+    $scope.menu = function() {
+      $mdSidenav('menu').toggle();
+    };
+
+    $scope.navigate = function(to) {
+      $state.go(to).then(function() {
+        $mdSidenav('menu').close();
+      });
+    };
+
+    $scope.currentApp=null;
+    $scope.apps=[];
+
+    $scope.$on('$transitionSuccess', function(evt, result) {
+      var match;
+      var app = $location.path().match(/^\/?([^\/]+)/);
+      if(app[1] && $scope.currentAppName != app[1]) {
+        $scope.currentAppName = app[1];
+      }
+    });
+
+    $scope.$watch('currentAppName', function(value) {
+      $scope.currentApp = $scope.apps[$scope.currentAppName]||{};
+    });
+
+    $scope.$on('zfAppRouteLoaded', function(evt, app, config) {
+      $scope.apps[app] = {
+        appImgAction: 'main',
+        appImg: config.image,
+        appTitle: config.title,
+        appDesc: config.description,
+        sideNav: []
+      };
+      setSideNav($scope.apps[app], config.routes.children, 'root.'+app+'.');
+      $scope.currentAppName = app;
+    });
+
+    function setSideNav(app, routes, parent) {
+      if(angular.isArray(routes)) {
+        angular.forEach(routes, function(route) {
+          if(route.sidenav == 'default') {
+            app.appImgAction = parent+route.name;
+          } else if(route.sidenav) {
+            if(angular.isObject(route.sidenav)) {
+              route.sidenav.to = parent+route.name;
+              app.sideNav.push(route.sidenav);
+            } else if(angular.isString(route.sidenav)) {
+              app.sideNav.push({title: route.sidenav, to: parent+route.name});
+            } else {
+              app.sideNav.push({title: route.name, to: parent+route.name});
+            }
+          }
+          if(route.children) {
+            setSideNav(app, route.children, parent+route.name+'.');
+          }
+        });
+      }
+    }
   })
   .constant('defaultUrl', '/yuli/login')
   .provider('zafiro', function() {
@@ -226,13 +286,14 @@ var zf = angular.module('zafiro', [
       addClass: function(element, className, done) {
         if(className == 'moveLeft' || className == 'moveRight') {
           //if(element.hasClass('active')) {
+            element.removeClass('moveLeft');
             element.animate({
               transform: "scale(0.75)",
               border: "1px solid gray"
-            }, 300, 'swing', function() {
+            }, 300, function() {
               element.animate({
                 left: className=='moveLeft'?'-1200px':'2400px'
-              }, 700, 'linear', done);
+              }, 700, done);
             });
             
          // }
@@ -261,15 +322,61 @@ var zf = angular.module('zafiro', [
       restrict: 'A',
       link: function(scope, element, attrs) {
         attrs.$observe(dirAttr, function(value) {
-          var project = $location.path().match(/^\/?([^\/]+)/);
-          if(project[1] && !new RegExp('^/app/'+project[1]+'/').test(value)) {
-            value = '/app/'+project[1]+'/'+value.replace(/^\/+/, '');
+          var app = $location.path().match(/^\/?([^\/]+)/);
+          if(app[1] && !new RegExp('^/app/'+app[1]+'/').test(value)) {
+            value = '/app/'+app[1]+'/'+value.replace(/^\/+/, '');
           }
           attrs.$set(refAttr, value);
         });
       }
-    }
+    };
   }]);  
 });
 
-zf.directive('zfSref', ['$location'])
+zf.directive('zfSref', ['$location', '$state', '$rootScope', function($location, $state, $rootScope) {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      var linkFn = function(){};
+      element.click(function(evt) {
+        evt.preventDefault();
+        linkFn();
+      });
+      attrs.$observe('zfSref', function(value) {
+        linkFn = function(){};
+        if(angular.isString(value) && !/^[\^.]/.test(value)) {
+          var match;
+          var app;
+          if(match = value.match(/^\(([a-z]+)\)(.*)$/)) {
+            linkFn = function() {
+              var off = $rootScope.$on('zfAppRouteLoaded', function(evt, root) {
+                off();
+                var toffS = $rootScope.$on('$transitionSuccess', function() {
+                  toffS();
+                  toffE();
+                  if(root == match[1]) {
+                    $state.go('root.'+match[1]+'.'+(match[2]||'main'));
+                  }
+                });
+                var toffE = $rootScope.$on('$transitionError', function() {
+                  toffS();
+                  toffE();
+                });
+              });
+              $location.path('/'+match[1]+'/');
+              scope.$apply();
+            }
+            return;
+          } else if(app = $location.path().match(/^\/?([^\/]+)/)) {
+              value = 'root.'+app[1]+'.'+value;
+          } else {
+            return;
+          }
+        }
+        linkFn = function() {
+          $state.go(value);
+        };
+      });
+    }
+  };
+}])
