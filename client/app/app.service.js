@@ -1,7 +1,6 @@
 'use strict';
 
 angular.module('zafiro')
-  .constant('defaultUrl', '/yuli/login')
   .provider('zafiro', function() {
     var rest = {};
     var wsdl = {};
@@ -105,6 +104,15 @@ angular.module('zafiro')
             return $soap.get.apply($soap, args);
           }
           throw 'Soap not available';
+        },
+        login: function(params, success, error) {
+          $http.post('/api/zafiro/login', params)
+          .success(function(data) {
+            success&&success(data);
+          })
+          .error(function(data) {
+            error&&error(data);
+          });
         }
       }
     }];

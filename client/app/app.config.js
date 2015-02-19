@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('zafiro')
-.config(function ($stateProvider, $urlRouterProvider, $locationProvider, $futureStateProvider, defaultUrl) {
+.config(function ($stateProvider, $urlRouterProvider, $locationProvider, $futureStateProvider) {
     $urlRouterProvider
       .otherwise(function($injector, $location) {
         var host = $location.host().split('.')[0];

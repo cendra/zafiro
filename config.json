@@ -2,6 +2,9 @@
 	"appsPath": "apps",
 	"auth": {
 		"loginUrl": "/yuli/login",
-		"returnParam": "returnUrl"
+		"returnParam": "returnUrl",
+		"rest": {
+			"post": "http://localhost:9001/yuli/login"
+		}
 	}
 }

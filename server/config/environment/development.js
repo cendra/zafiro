@@ -4,9 +4,16 @@
 // ==================================
 module.exports = {
   // MongoDB connection options
-  mongo: {
-    uri: 'mongodb://localhost/zafiro-dev'
-  },
-
-  seedDB: true
+  	auth: {
+		loginUrl: "/yuli/login",
+		returnParam: "returnUrl",
+		rest: {
+			post: "http://localhost:9001/yuli/login"
+		}
+	},
+	oauth: {
+		url: "",
+		client_key: "",
+		client_secret: ""
+	}
 };
