@@ -18,10 +18,15 @@
     "angular-toasty": "~0.1.8",
     "angular-soap": "~1.0.0",
     "angular-material": "~0.7.1",
-    "angular-material-icons": "~0.4.0"
+    "angular-material-icons": "~0.4.0",
+    "angular-formly": "~3.1.6",
+    "angular-formly-templates-material": "*"
   },
   "devDependencies": {
     "angular-mocks": ">=1.2.*",
     "angular-scenario": ">=1.2.*"
+  },
+  "resolutions": {
+    "angular": ">=1.2.*"
   }
 }

@@ -4,6 +4,46 @@
 		"selected_items":
 		[
 			[
+				"re",
+				"results"
+			],
+			[
+				"stat",
+				"status"
+			],
+			[
+				"st",
+				"status"
+			],
+			[
+				"in",
+				"infoUrl"
+			],
+			[
+				"res",
+				"result"
+			],
+			[
+				"req",
+				"require"
+			],
+			[
+				"au",
+				"authorizationPath"
+			],
+			[
+				"oidp",
+				"oidpRoute"
+			],
+			[
+				"oid",
+				"oidcRoute"
+			],
+			[
+				"consent",
+				"consentUrl"
+			],
+			[
 				"tran",
 				"transitionSuccess"
 			],
@@ -96,10 +136,6 @@
 				"restBase"
 			],
 			[
-				"res",
-				"restBase"
-			],
-			[
 				"fu",
 				"function"
 			],
@@ -108,16 +144,8 @@
 				"children"
 			],
 			[
-				"st",
-				"state"
-			],
-			[
 				"modu",
 				"module"
-			],
-			[
-				"req",
-				"require"
 			],
 			[
 				"f",
@@ -138,10 +166,6 @@
 			[
 				"tem",
 				"templateUrl"
-			],
-			[
-				"re",
-				"result"
 			],
 			[
 				"que",
@@ -208,10 +232,6 @@
 				"mails"
 			],
 			[
-				"in",
-				"input"
-			],
-			[
 				"con",
 				"console"
 			],
@@ -243,31 +263,39 @@
 			"file": "server/api/zafiro/index.js",
 			"settings":
 			{
-				"buffer_size": 1367,
+				"buffer_size": 3067,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "package.json",
+			"file": "client/app/app.service.js",
 			"settings":
 			{
-				"buffer_size": 2788,
+				"buffer_size": 3932,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "Gruntfile.js",
+			"file": "server/config/environment/development.js",
 			"settings":
 			{
-				"buffer_size": 17333,
+				"buffer_size": 559,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/app/app.js",
+			"file": "server/routes.js",
 			"settings":
 			{
-				"buffer_size": 11892,
+				"buffer_size": 535,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/agustin/git/yuli/idp/idp.js",
+			"settings":
+			{
+				"buffer_size": 6877,
 				"line_ending": "Unix"
 			}
 		},
@@ -275,55 +303,39 @@
 			"file": "apps/yuli/module.json",
 			"settings":
 			{
-				"buffer_size": 1695,
+				"buffer_size": 1778,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "apps/test/module.json",
+			"file": "apps/yuli/scripts/controllers/login.js",
 			"settings":
 			{
-				"buffer_size": 308,
+				"buffer_size": 394,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/index.html",
+			"file": "apps/yuli/views/login.html",
 			"settings":
 			{
-				"buffer_size": 6015,
+				"buffer_size": 177,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/app/app.scss",
+			"file": "client/app/app.js",
 			"settings":
 			{
-				"buffer_size": 623,
+				"buffer_size": 264,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "bower.json",
+			"file": "client/bower_components/angular-formly-templates-material/bower.json",
 			"settings":
 			{
-				"buffer_size": 692,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/components/modal/modal.scss",
-			"settings":
-			{
-				"buffer_size": 462,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/bower_components/angular-material-icons/index.html",
-			"settings":
-			{
-				"buffer_size": 70084,
+				"buffer_size": 727,
 				"line_ending": "Unix"
 			}
 		}
@@ -352,16 +364,28 @@
 	},
 	"file_history":
 	[
-		"/home/agustin/git/zafiro/apps/yuli/styles/main.css",
 		"/home/agustin/git/zafiro/apps/yuli/index.html",
-		"/home/agustin/git/zafiro/client/index.html",
-		"/home/agustin/git/zafiro/server/api/zafiro/app.template",
+		"/home/agustin/git/yuli/idp/idp.js",
+		"/home/agustin/git/yuli/idp/node_modules/openid-connect/index.js",
+		"/home/agustin/git/zafiro/client/app/app.config.js",
+		"/home/agustin/git/zafiro/client/app/app.controller.js",
+		"/home/agustin/git/zafiro/client/app/app.js",
+		"/home/agustin/git/zafiro/package.json",
+		"/home/agustin/git/zafiro/Gruntfile.js",
+		"/home/agustin/git/zafiro/apps/yuli/module.json",
 		"/home/agustin/git/zafiro/apps/test/module.json",
+		"/home/agustin/git/zafiro/client/index.html",
+		"/home/agustin/git/zafiro/client/app/app.scss",
+		"/home/agustin/git/zafiro/server/config/environment/development.js",
+		"/home/agustin/git/zafiro/bower.json",
+		"/home/agustin/git/zafiro/client/components/modal/modal.scss",
+		"/home/agustin/git/zafiro/config.json",
+		"/home/agustin/git/zafiro/client/bower_components/angular-material-icons/index.html",
+		"/home/agustin/git/zafiro/apps/yuli/styles/main.css",
+		"/home/agustin/git/zafiro/server/api/zafiro/app.template",
 		"/home/agustin/git/zafiro/client/app/main/main.js",
 		"/home/agustin/git/zafiro/server/app.js",
 		"/home/agustin/git/zafiro/server/api/zafiro/zafiro.socket.js",
-		"/home/agustin/git/zafiro/Gruntfile.js",
-		"/home/agustin/git/zafiro/client/app/app.js",
 		"/home/agustin/git/zafiro/server/config/environment/test.js",
 		"/home/agustin/git/yuli/migracion/app/scripts/controllers/main.js",
 		"/home/agustin/git/yuli/migracion/app/scripts/app.js",
@@ -397,6 +421,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"zxcvbn",
+			"zxcvbn2",
+			"zxcvbn2N",
+			"zxcvbn2",
 			"zfapp",
 			"project",
 			"Project",
@@ -441,7 +469,6 @@
 	"groups":
 	[
 		{
-			"selected": 4,
 			"sheets":
 			[
 				{
@@ -449,15 +476,70 @@
 					"file": "server/api/zafiro/index.js",
 					"settings":
 					{
-						"buffer_size": 1367,
+						"buffer_size": 3067,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1330,
-								1330
+								1632,
+								1632
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 612.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "client/app/app.service.js",
+					"settings":
+					{
+						"buffer_size": 3932,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3886,
+								3886
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1428.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "server/config/environment/development.js",
+					"settings":
+					{
+						"buffer_size": 559,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								518,
+								518
 							]
 						],
 						"settings":
@@ -472,75 +554,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "package.json",
-					"settings":
-					{
-						"buffer_size": 2788,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 54.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "Gruntfile.js",
-					"settings":
-					{
-						"buffer_size": 17333,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1722.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
 					"buffer": 3,
-					"file": "client/app/app.js",
+					"file": "server/routes.js",
 					"settings":
 					{
-						"buffer_size": 11892,
+						"buffer_size": 535,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3869,
-								3869
+								209,
+								209
 							]
 						],
 						"settings":
@@ -550,30 +576,30 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2499.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 4,
-					"file": "apps/yuli/module.json",
+					"file": "/home/agustin/git/yuli/idp/idp.js",
 					"settings":
 					{
-						"buffer_size": 1695,
+						"buffer_size": 6877,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1501,
-								1501
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
@@ -584,18 +610,18 @@
 				},
 				{
 					"buffer": 5,
-					"file": "apps/test/module.json",
+					"file": "apps/yuli/module.json",
 					"settings":
 					{
-						"buffer_size": 308,
+						"buffer_size": 1778,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								291,
-								291
+								1470,
+								1470
 							]
 						],
 						"settings":
@@ -611,51 +637,49 @@
 				},
 				{
 					"buffer": 6,
-					"file": "client/index.html",
+					"file": "apps/yuli/scripts/controllers/login.js",
 					"settings":
 					{
-						"buffer_size": 6015,
+						"buffer_size": 394,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2560,
-								2560
+								279,
+								279
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 255.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 7,
-					"file": "client/app/app.scss",
+					"file": "apps/yuli/views/login.html",
 					"settings":
 					{
-						"buffer_size": 623,
+						"buffer_size": 177,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								454,
-								454
+								81,
+								81
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/HTML/HTML.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -665,23 +689,23 @@
 				},
 				{
 					"buffer": 8,
-					"file": "bower.json",
+					"file": "client/app/app.js",
 					"settings":
 					{
-						"buffer_size": 692,
+						"buffer_size": 264,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								256,
+								256
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
@@ -693,54 +717,28 @@
 				},
 				{
 					"buffer": 9,
-					"file": "client/components/modal/modal.scss",
+					"file": "client/bower_components/angular-formly-templates-material/bower.json",
 					"settings":
 					{
-						"buffer_size": 462,
+						"buffer_size": 727,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								462,
-								462
+								272,
+								272
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "client/bower_components/angular-material-icons/index.html",
-					"settings":
-					{
-						"buffer_size": 70084,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 4,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 969.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

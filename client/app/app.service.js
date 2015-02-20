@@ -109,9 +109,11 @@ angular.module('zafiro')
           $http.post('/api/zafiro/login', params)
           .success(function(data) {
             success&&success(data);
+            console.log(data);
           })
           .error(function(data) {
             error&&error(data);
+            console.log(data);
           });
         }
       }
