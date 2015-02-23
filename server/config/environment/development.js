@@ -11,10 +11,10 @@ module.exports = {
 	},
 	user: {
 		info: {
-			rest: "http://localhost:8089/api/account"
+			rest: "http://localhost:8089/api/account/:id:"
 		},
 		roles: {
-			rest: "http://localhost:8089/api/roles"
+			rest: "http://localhost:8089/api/account/:id:/roles"
 		}
 	},
 	oauth: {

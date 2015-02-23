@@ -106,7 +106,7 @@ angular.module('zafiro')
           throw 'Soap not available';
         },
         login: function(params, success, error) {
-          $http.post('/api/zafiro/login', params)
+          $http.post('/api/zafiro/login', params, {cache: false})
           .success(function(data) {
             success&&success(data);
             console.log(data);

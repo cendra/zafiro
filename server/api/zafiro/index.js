@@ -52,30 +52,37 @@ router.post('/login', function(req, res, next) {
 			var step = config.auth;
 			if(step.rest) {
 				request.post({url: step.rest, form: req.body}, function(err, response, body) {
-					var body = JSON.parse(body);
-					if(err) {
-						return cb({status: response.statusCode, msg: body});
+					try {
+						var body = JSON.parse(body);
+					} catch(e) {
+						console.log(body);
+						console.log(err);
+					}
+					if(err || response.statusCode != 200) {
+						return cb({status: response.statusCode||500, msg: body});
 					} else {
 						return cb(null, body.id);
 					}
 					
 				});
+			} else {
+				cb({status: 500, msg: 'No user id found.'});
 			}
-			cb({status: 500, msg: 'No user id found.'});
 		},
 		oauth: ['id', function(cb, user) {
-			oauth.Client.getToken(function(err, result) {
+			oauth.client.getToken({scope: ['openid', 'profile']}, function(err, result) {
 				return cb(err, result&&oauth.accessToken.create(result));
 			});
 		}],
 		info: ['oauth', function(cb, user) {
 			var step = config.user.info
 			if(step.rest) {
-				var infoUrl = url.parse(step.rest);
+				var infoUrl = url.parse(step.rest.replace(/:id:/g, user.id));
+				infoUrl.query=infoUrl.query||{};
 				infoUrl.query.access_token = user.oauth.token.access_token;
 				request.get(url.format(infoUrl), function(err, response, body) {
 					if(err) {
-						return cb({status: response.statusCode, msg: body});
+						return cb({status: response.statusCode||500, msg: body});
 					} else {
 						return cb(null, body);
 					}
@@ -85,7 +92,8 @@ router.post('/login', function(req, res, next) {
 		roles: ['oauth', function(cb, user) {
 			var step = config.user.roles
 			if(step.rest) {
-				var rolesUrl = url.parse(step.rest);
+				var rolesUrl = url.parse(step.rest.replace(/:id:/g, user.id));
+				rolesUrl.query=rolesUrl.query||{};
 				rolesUrl.query.access_token = user.oauth.token.access_token;
 				request.get(url.format(rolesUrl), function(err, response, body) {
 					if(err) {

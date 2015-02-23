@@ -11,9 +11,9 @@ angular.module('zafiro', [
   'oc.lazyLoad',
   'angularSoap',
   'ngMaterial',
-  'ngMdIcons',
+  'ngMdIcons'/*,
   'formly',
-  'formlyLumx'
+  'formlyMaterial'*/
 ]);
 
 
