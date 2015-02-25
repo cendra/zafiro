@@ -9,10 +9,11 @@ angular.module('zafiro', [
   'ui.router',
   'ct.ui.router.extras',
   'oc.lazyLoad',
-  'toasty',
   'angularSoap',
   'ngMaterial',
-  'ngMdIcons'
+  'ngMdIcons'/*,
+  'formly',
+  'formlyMaterial'*/
 ]);
 
 

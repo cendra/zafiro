@@ -3,11 +3,14 @@
 var express = require('express');
 //var controller = require('./zafiro.controller');
 var fs = require('fs');
+var url = require('url');
 var path = require('path');
 var async = require('async');
 var config = require('../../config/environment');
 var appsPath = path.join(config.root, 'apps');
 var extend = require('extend');
+var request = require('request');
+var oauth = require('simple-oauth2')(config.oauth);
 
 var router = express.Router();
 
@@ -41,6 +44,74 @@ router.get('/module/:module', function(req, res, next) {
 		module.routes.name = req.params.module;
 		res.json(module);
 	});
+});
+
+router.post('/login', function(req, res, next) {
+	async.auto({
+		id: function(cb) {
+			var step = config.auth;
+			if(step.rest) {
+				request.post({url: step.rest, form: req.body}, function(err, response, body) {
+					try {
+						var body = JSON.parse(body);
+					} catch(e) {
+						console.log(body);
+						console.log(err);
+					}
+					if(err || response.statusCode != 200) {
+						return cb({status: (response&&response.statusCode)||500, msg: body});
+					} else {
+						return cb(null, body.id);
+					}
+					
+				});
+			} else {
+				cb({status: 500, msg: 'No user id found.'});
+			}
+		},
+		oauth: ['id', function(cb, user) {
+			oauth.client.getToken({scope: ['roles', 'profile']}, function(err, result) {
+				return cb(err, result&&oauth.accessToken.create(result));
+			});
+		}],
+		info: ['oauth', function(cb, user) {
+			var step = config.user.info
+			if(step.rest) {
+				var infoUrl = url.parse(step.rest.replace(/:id:/g, user.id));
+				infoUrl.query=infoUrl.query||{};
+				infoUrl.query.access_token = user.oauth.token.access_token;
+				request.get(url.format(infoUrl), function(err, response, body) {
+					if(err || response.statusCode != 200) {
+						return cb({status: (response&&response.statusCode)||500, msg: body});
+					} else {
+						return cb(null, body);
+					}
+				});
+			}
+		}],
+		roles: ['oauth', function(cb, user) {
+			var step = config.user.roles
+			if(step.rest) {
+				var rolesUrl = url.parse(step.rest.replace(/:id:/g, user.id));
+				rolesUrl.query=rolesUrl.query||{};
+				rolesUrl.query.access_token = user.oauth.token.access_token;
+				request.get(url.format(rolesUrl), function(err, response, body) {
+					if(err || response.statusCode != 200) {
+						return cb({status: (response&&response.statusCode)||500, msg: body});
+					} else {
+						return cb(null, body);
+					}
+				});
+			}
+		}]
+	}, 	function(err, results) {
+		if(err) {
+			return res.status(err.status||500).json(err.msg);
+		}
+		req.session.user = results;
+		res.json(results.info);
+	});
+	
 });
 
 module.exports = router;
