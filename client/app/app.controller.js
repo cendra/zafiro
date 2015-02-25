@@ -7,10 +7,11 @@ angular.module('zafiro')
       $mdSidenav('menu').toggle();
     };
 
-    $scope.navigate = function(to) {
+    $scope.navigate = function(to, title) {
       $state.go(to).then(function() {
         $mdSidenav('menu').close();
       });
+      $scope.currentTitle = title;
     };
 
     $scope.currentApp=null;
