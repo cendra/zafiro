@@ -39,6 +39,20 @@ router.get('/module/:module', function(req, res, next) {
 			return next(err);
 		}
 		if(!module.routes) return next('No routes defined for module');
+		var processSidenavPerms = function(route) {
+ 			if(route.children) {
+				route.children = route.children.filter(function(item) {
+					return processSidenavPerms(item);
+				});
+				if(!route.children.length) delete route.children;
+			} 
+			if(route.children || route.public) return true;
+			if(!req.session.user || !req.session.user.roles || !req.session.user.roles[req.params.module] || !route.roles) return false;
+			if(typeof (route.roles||route.role) == 'string') return !!req.session.user.roles[req.params.module][route.roles||route.role];
+			return !!route.roles.filter(function(role) { return req.session.user.roles[req.params.module][role]; }).length;
+
+		};
+		processSidenavPerms(module.routes);
 		module.routes.files = module.routes.files||[];
 		module.routes.files.concat(module.files||[]);
 		module.routes.name = req.params.module;
@@ -99,7 +113,7 @@ router.post('/login', function(req, res, next) {
 					if(err || response.statusCode != 200) {
 						return cb({status: (response&&response.statusCode)||500, msg: body});
 					} else {
-						return cb(null, body);
+						return cb(null, JSON.parse(body));
 					}
 				});
 			}
