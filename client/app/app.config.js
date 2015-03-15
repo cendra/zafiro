@@ -48,21 +48,23 @@ angular.module('zafiro')
 
     $futureStateProvider.stateFactory('module', function($http, futureState, $rootScope) {
       return $http.get('/api/zafiro/module/'+futureState.name).then(function(resp) {
-        processRoutes(angular.copy(resp.data.routes));
-        $rootScope.$broadcast('zfAppRouteLoaded', futureState.name, resp.data);
+          processRoutes(angular.copy(resp.data.routes), resp.data.routes.setModule);
+          $rootScope.$broadcast('zfAppRouteLoaded', futureState.name, resp.data);
       });
     });
 
-    function processRoutes(route, parentState, appUrl) {
+    function processRoutes(route, setModule, parentState, appName, parentResolve) {
+      var thisResolve = false;
       if(!parentState) {
         parentState = 'root';
-       
-        appUrl = '/app/'+route.name+'/';
+
+        appName = route.name;
         
         (route.url=='/'||!route.url)&&(route.url=route.name);
         route.abstract = true;
         if(!route.template&&!route.templateUrl) route.template = "<div ui-view></div>";
       }
+      var appUrl = '/app/'+appName+'/';
 
       var children = route.children||[];
       var files = route.files||[];
@@ -81,19 +83,30 @@ angular.module('zafiro')
         if(!route.resolve) {
           route.resolve = {};
         }
-
-        route.resolve[name+'Resolve'] = function($ocLazyLoad) {
+        var loader = function($ocLazyLoad) {
           return $ocLazyLoad.load({
-            name: 'zafiro',
+            name: 'zafiro'+(setModule?'.'+appName:''),
             files: files
           });
-        }; 
+        };
+        thisResolve = parentState+'.'+name+'Resolve';
+        var resolves = ['$ocLazyLoad'];
+        if(parentResolve) {
+          resolves.push(parentResolve);
+          resolves.push(function($ocLazyLoad, parent) {
+            return loader($ocLazyLoad);
+          });
+        } else {
+          resolves.push(loader);  
+        }
+        
+        route.resolve[thisResolve] = resolves; 
       }
        
       $stateProvider.state(parentState+'.'+name, route);
 
       children.forEach(function(child) {
-        processRoutes(child, parentState+'.'+name, appUrl);
+        processRoutes(child, setModule, parentState+'.'+name, appName, thisResolve||parentResolve);
       });
     }
 

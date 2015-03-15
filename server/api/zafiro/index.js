@@ -11,6 +11,7 @@ var appsPath = path.join(config.root, 'apps');
 var extend = require('extend');
 var request = require('request');
 var oauth = require('simple-oauth2')(config.oauth);
+var bower = require('bower');
 
 var router = express.Router();
 
@@ -39,12 +40,45 @@ router.get('/module/:module', function(req, res, next) {
 			return next(err);
 		}
 		if(!module.routes) return next('No routes defined for module');
+		processSidenavPerms(module.routes, req);
 		module.routes.files = module.routes.files||[];
 		module.routes.files.concat(module.files||[]);
 		module.routes.name = req.params.module;
-		res.json(module);
+		if(module.modFilePath) {
+			module.routes.files.push(module.modFilePath);
+			module.routes.setModule = true;
+			delete module.modFilePath;
+		}
+		bower.commands.list({paths: true, json: true}, {cwd: path.join(appsPath, req.params.module)})
+		.on('end', function(list) {
+			for(var i in list) {
+				if(typeof list[i] == 'string') {
+					module.routes.files.push(list[i]);
+				} else {
+					module.routes.files = module.routes.files.concat(list[i]);
+				}
+			}
+			res.json(module);
+		})
+		.on('error', function() {
+			res.json(module);
+		});
 	});
 });
+
+var processSidenavPerms = function(route, req) {
+		if(route.children) {
+		route.children = route.children.filter(function(item) {
+			return processSidenavPerms(item, req);
+		});
+		if(!route.children.length) delete route.children;
+	} 
+	if(route.children || route.public) return true;
+	if(!req.session.user || !req.session.user.roles || !req.session.user.roles[req.params.module] || !route.roles) return false;
+	if(typeof (route.roles||route.role) == 'string') return !!req.session.user.roles[req.params.module][route.roles||route.role];
+	return !!route.roles.filter(function(role) { return req.session.user.roles[req.params.module][role]; }).length;
+
+};
 
 router.post('/login', function(req, res, next) {
 	async.auto({
@@ -99,7 +133,7 @@ router.post('/login', function(req, res, next) {
 					if(err || response.statusCode != 200) {
 						return cb({status: (response&&response.statusCode)||500, msg: body});
 					} else {
-						return cb(null, body);
+						return cb(null, JSON.parse(body));
 					}
 				});
 			}

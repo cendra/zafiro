@@ -28,6 +28,7 @@
     <![endif]-->
     <md-content layout="column" ng-controller="zafiroCtrl" style="height: 100%">
       <md-toolbar id="toolbar" layout="row" layout-align="start center" layout-padding>
+        <div class="md-toolbar-tools">
         <div layout="row" layout-align="start center" style="width: 304px">
           <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon> 
           <div class="md-tile-content" layout layout-align="start center">
@@ -39,6 +40,9 @@
           <h3>{{currentApp.appTitle}}</h3>
           <h4>{{currentApp.appDesc}}</h4>
         </div>
+        </div>  
+        <md-toolbar-flexible style="height: 300px">
+        </md-toolbar-flexible>
       </md-toolbar>
       <md-content layout="row" layout-align="center start" flex>
         <md-sidenav id="menu" md-component-id="menu" class="md-sidenav-left">
@@ -108,12 +112,8 @@
           <script src="app/app.controller.js"></script>
           <script src="app/app.directive.js"></script>
           <script src="app/app.service.js"></script>
-          <script src="components/auth/auth.service.js"></script>
-          <script src="components/auth/user.service.js"></script>
-          <script src="components/modal/modal.service.js"></script>
-          <script src="components/mongoose-error/mongoose-error.directive.js"></script>
-          <script src="components/navbar/navbar.controller.js"></script>
           <script src="components/socket/socket.service.js"></script>
+          <script src="components/toolbar-complements/toolbar-complements.js"></script>
           <!-- endinjector -->
         <!-- endbuild -->
 </body>
