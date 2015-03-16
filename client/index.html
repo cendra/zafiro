@@ -27,21 +27,30 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
     <md-content layout="column" ng-controller="zafiroCtrl" style="height: 100%">
-      <md-toolbar id="toolbar" layout="row" layout-align="start center" layout-padding>
-        <div class="md-toolbar-tools">
-        <div layout="row" layout-align="start center" style="width: 304px">
-          <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon> 
-          <div class="md-tile-content" layout layout-align="start center">
-            <h4>{{currentTitle}}</h4>
+      <md-toolbar id="toolbar" layout="column" layout-align="start center" layout-padding>
+        <div layout="row">
+          <div class="md-toolbar-tools">
+          <div layout="row" layout-align="start center" style="width: 304px">
+            <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon> 
+            <div class="md-tile-content" layout layout-align="start center">
+              <h4>{{currentTitle}}</h4>
+            </div>
           </div>
+          <img ng-if="currentApp.appImg" zf-src="{{currentApp.appImg}}" ng-click="navigate(currentApp.appImgAction, '')"/>
+          <div layout="column" class="md-tile-content">
+            <h3>{{currentApp.appTitle}}</h3>
+            <h4>{{currentApp.appDesc}}</h4>
+          </div>
+          </div>  
         </div>
-        <img ng-if="currentApp.appImg" zf-src="{{currentApp.appImg}}" ng-click="navigate(currentApp.appImgAction, '')"/>
-        <div layout="column" class="md-tile-content">
-          <h3>{{currentApp.appTitle}}</h3>
-          <h4>{{currentApp.appDesc}}</h4>
-        </div>
-        </div>  
         <md-toolbar-flexible style="height: 300px">
+        aaaaaaaaaa
+        aaa
+        a
+        a
+        a
+        a
+
         </md-toolbar-flexible>
       </md-toolbar>
       <md-content layout="row" layout-align="center start" flex>
