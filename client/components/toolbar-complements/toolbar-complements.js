@@ -2,8 +2,8 @@
 'use strict';
 
 angular.module('material.components.toolbar')
-  .directive('mdToolbarFlexible', mdToolbarFlexibleDirective);
- // .directive('mdToolbarFlexibleItem', mdToolbarFlexibleItemDirective);
+  .directive('mdToolbarFlexible', mdToolbarFlexibleDirective)
+  .directive('mdToolbarFlexibleItem', mdToolbarFlexibleItemDirective);
 
   function mdToolbarFlexibleDirective($$rAF, $mdConstant, $mdUtil, $mdTheming) {
 
@@ -20,13 +20,12 @@ angular.module('material.components.toolbar')
 	      	var flexibleHeight;
 	      	var toolbarHeight;
           	var contentElement;
+          	var wrapper;
 
-          	var debouncedContentScroll = function(e) {
-          		var stamp = new Date().getTime();
-          		var top = contentElement.scrollTop();
-          		$$rAF.throttle(function() {
-          			onContentScroll(e, contentElement.scrollTop() - top, new Date().getTime() - stamp);
-          		})();
+          	var debouncedContentScroll = $$rAF.throttle(onContentScroll);
+
+          	var scrollBlock = function(e) {
+          		e.preventDefault();
           	};
           	//var debouncedUpdateHeight = $mdUtil.debounce(updateToolbarHeight, 5 * 1000);
 
@@ -38,21 +37,25 @@ angular.module('material.components.toolbar')
 	        function onMdContentLoad($event, newContentEl) {
 	          // Toolbar and content must be siblings
 	        	if (element.parent().parent()[0] === newContentEl.parent()[0]) {
-		            element
-		            	.wrap('<div style="overflow:hidden;"></div>')
-		            	.css('display', 'block');
+	        		wrapper = element
+		            	.wrap('<div style="overflow:hidden; display: inline"></div>')
+		            	.css('display', 'block')
+		            	.parent();
 
+		            wrapper.parent()
+		            	.on('wheel', debouncedContentScroll);
 		            // unhook old content event listener if exists
 		            if (contentElement) {
-		              contentElement.off('scroll', debouncedContentScroll);
+		              contentElement.off('wheel', debouncedContentScroll);
+		              contentElement.off('scroll', scrollBlock);
 		            }
 					//flexibleHeight = element.prop('offsetHeight');
-		            newContentEl.on('scroll', debouncedContentScroll);
+		            newContentEl.on('wheel', debouncedContentScroll);
 		            newContentEl.attr('flexible-shrink', 'true');
 
 		            contentElement = newContentEl;
 		            //$$rAF(updateToolbarHeight);
-		            scope.$broadcast('$mdToolbarFlexibleLoaded', element);
+		            scope.$broadcast('$mdToolbarFlexibleLoaded', element, wrapper.parent());
 		        }
 	        }
 
@@ -71,23 +74,84 @@ angular.module('material.components.toolbar')
 	          onContentScroll();
 	        }*/
 
-	        function onContentScroll(e, diff, millis) {
-	          if(contentElement.scrollTop() == 0 && diff == 0 && element.height() + element.position().top > 0) {
-	          	element.css(
-		            $mdConstant.CSS.TRANSFORM,
-		            'translate3d(0,' + (-millis * shrinkSpeedFactor) + 'px,0)'
-		        );
-	          } else if(diff > 0 && element.height() + element.position().top <= element.height()) {
-	          	e.preventDefault();
-	          	var val = element.position().top + diff;
-	          	element.css(
-		            $mdConstant.CSS.TRANSFORM,
-		            'translate3d(0,' + (val * shrinkSpeedFactor) + 'px,0)'
-		        );
-	          }
+	        function onContentScroll(e) {
+	          if(contentElement.scrollTop() == 0) {
+	          	var orgEvent = e.originalEvent;
+	          	var deltaY = orgEvent.deltaY || orgEvent.detail || orgEvent.wheelDelta / 40;
+	          	
+	          	if((deltaY < 0 && wrapper.height() > 0) || (deltaY > 0 && wrapper.height() < element.height())) {
+	          		if ( orgEvent.deltaMode === 1 ) {
+			            var lineHeight = parseInt(contentElement.css('fontSize'), 10) || parseInt(element.css('fontSize'), 10) || 16;
+			            deltaY *= lineHeight;
+			        } else if ( orgEvent.deltaMode === 2 ) {
+			            var pageHeight = contentElement.height();
+			            deltaY *= pageHeight;
+			        }
+			        var delta = deltaY * shrinkSpeedFactor;
+		          	element.css(
+			            $mdConstant.CSS.TRANSFORM,
+			            'translate3d(0,' + delta + 'px,0)'
+			        );
+			        wrapper.css('height', (wrapper.height()+delta)+'px');
+			        element.trigger('$mdToolbarFlexibleResize', [(element.height()-wrapper.height())/element.height(), element]);	
+			        e.preventDefault();
+	          	}
+
+	          } 
 	        }
 	  	}
 	  };
+  }
+
+  function mdToolbarFlexibleItemDirective($$rAF, $mdConstant, $mdUtil, $mdTheming) {
+  	return {
+	    restrict: 'EA',
+	    controller: angular.noop,
+	    link: function(scope, element, attr) {
+	    	attr.animate && (attr.animate = JSON.parse(attr.animate));
+	    	var parentFlexible = element.closest('md-toolbar-flexible')[0],
+	    		anchor,
+	    		anchorPos,
+	    		state = {};
+	    	scope.$on('$mdToolbarFlexibleLoaded', function(event, flexible, toolbar) {
+	    		if(parentFlexible == flexible[0]) {
+	    			anchor = attr.anchor||'bottom';
+	    			anchorPos = element.css(anchor);
+	    			if(anchorPos=='auto') {
+	    				if(['bottom', 'right'].indexOf(anchor) == -1) {
+	    					anchorPos = (flexible.position()[anchor]+element.position()[anchor]);
+	    				} else if(anchor == 'bottom') {
+	    					anchorPos = toolbar.height() - (flexible.position().top+element.position().top+element.height());
+	    				} else {
+	    					anchorPos = toolbar.width() - (flexible.position().left+element.position().left+element.width());
+	    				}
+	    				anchorPos += 'px';
+	    			}
+	    			if(['fixed', 'absolute'].indexOf(element.css('position')) == -1) {
+	    				element.css('position', 'absolute').css(anchor, anchorPos);
+	    			}
+
+	    			for(var i in attr.animate) {
+	    				var iniState = element.css(i).match(/^([\d.]+)(\D*)/);
+	    				var toState = attr.animate[i].match(/^([\d.]+)(\D*)/);
+	    				var iniValue = parseInt(iniState[1],10);
+	    				var toValue = parseInt(toState[1],10);
+	    				state[i] = {ini: iniValue, diff: toValue - iniValue, unit: iniState[2]};
+	    			}
+
+	    			toolbar.append(element);
+
+					flexible.on('$mdToolbarFlexibleResize', function(e, ratio, flexible) {
+						var tmpState = {};
+						for(var i in state) {
+							tmpState[i] = (Math.round((state[i].ini + (state[i].diff * ratio)) * 100) / 100) + (state[i].unit||'');
+						}
+			    		element.css(tmpState);
+			    	});	    			
+	    		}
+	    	});
+	    }
+	};
   }
 
 })();
