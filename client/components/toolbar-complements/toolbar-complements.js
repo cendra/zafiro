@@ -80,6 +80,7 @@ angular.module('material.components.toolbar')
 	          	var deltaY = orgEvent.deltaY || orgEvent.detail || orgEvent.wheelDelta / 40;
 	          	
 	          	if((deltaY < 0 && wrapper.height() > 0) || (deltaY > 0 && wrapper.height() < element.height())) {
+	          		e.preventDefault();
 	          		if ( orgEvent.deltaMode === 1 ) {
 			            var lineHeight = parseInt(contentElement.css('fontSize'), 10) || parseInt(element.css('fontSize'), 10) || 16;
 			            deltaY *= lineHeight;
@@ -93,8 +94,7 @@ angular.module('material.components.toolbar')
 			            'translate3d(0,' + delta + 'px,0)'
 			        );
 			        wrapper.css('height', (wrapper.height()+delta)+'px');
-			        element.trigger('$mdToolbarFlexibleResize', [(element.height()-wrapper.height())/element.height(), element]);	
-			        e.preventDefault();
+			        element.trigger('$mdToolbarFlexibleResize', [(element.height()-wrapper.height())/element.height(), element]);				        
 	          	}
 
 	          } 
