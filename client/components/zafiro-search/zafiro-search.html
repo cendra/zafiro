@@ -1,0 +1,68 @@
+
+<link rel="import" href="../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../../bower_components/core-icons/core-icons.html">
+<link rel="import" href="../../bower_components/core-field/core-field.html">
+<link rel="import" href="../../bower_components/core-collapse/core-collapse.html">
+<link rel="import" href="../zafiro-base/zafiro-base.html">
+
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="config ng-search">
+  <template>
+  	<style type="text/css">
+  		:host {
+  			color: black;
+  		}
+  		core-field {
+  			background-color: white;
+  			min-width: 400px
+  		}
+  		core-collapse {
+  			background-color: white;
+  			border-top: 1px solid rgba(0, 0, 0, 0.5);
+  			position: absolute;
+  			top: 0px;
+  			min-width: 400px;
+  			width: 100%;
+  			left: 0px;
+  		}
+
+  		.hidden {
+  			display: none;
+  		}
+  	</style>
+  	<core-field>
+  		{{ngModel}}
+  		<core-icon icon="search"></core-icon>
+	    <input type="text" placeholder="Buscar" value="{{ngModel}}" flex/>
+	    <core-icon id="ddIcon" on-click="{{ddToggle}}" icon="arrow-drop-down"></core-icon>
+	</core-field>
+	<div relative>
+		<core-collapse id="dropdown">
+	    	Algo de algo.
+		</core-collapse>
+	</div>
+  </template>
+  <script>
+  	Polymer({
+  		scoped: function() {
+  			this.ngModel += ' menos la menor!';
+  			this.fireSearch();
+  		},
+  		ddToggle: function () {
+  			this.$.dropdown.toggle();
+  		},
+  		created: function() {
+  			this.super();
+  			this.zsAdd({'zafiro:search:done': 'ng-search'})
+  		},
+  		ready: function() {
+  			this.super();
+  			if(!this.config) {
+  				this.$.ddIcon.className = 'hidden';
+  			}
+  		},
+  		fireSearch: function() {
+  			this.fire('zafiro:search:done')
+  		}
+  	});
+  </script>
+</polymer-element>

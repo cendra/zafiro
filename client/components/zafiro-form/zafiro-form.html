@@ -1,0 +1,24 @@
+<link rel="import" href="../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../../bower_components/core-icons/core-icons.html">
+<link rel="import" href="../../bower_components/core-field/core-field.html">
+
+<polymer-element name="zafiro-form" attributes="config ng-model">
+	<template>
+		<form id="form">
+		</form>
+	</template>
+	<script>
+		Polymer({
+			config: {},
+			publish: {
+				"ng-model": {
+					value: {},
+					reflect: true
+				}
+			},
+			ready: function() {
+
+			}
+		});
+	</script>
+</polymer-element>

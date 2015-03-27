@@ -67,4 +67,14 @@ zf.directive('zfSref', ['$location', '$state', '$rootScope', function($location,
       });
     }
   };
-}])
+}]);
+zf.directive('zfPolymer', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      element.each(function() {
+        this.setScope(scope);
+      });
+    }
+  }
+});

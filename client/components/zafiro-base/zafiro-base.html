@@ -1,0 +1,82 @@
+<polymer-element name="zafiro-base" attributes="ngModel">
+<script>
+	Polymer({
+		zsAttrs: ['ngModel'],
+		zsOrigValues: {},
+		zsEvts: {},
+		zsAdd: function(attr) {
+			if(attr instanceof Array) {
+				var self = this;
+				attr.forEach(function(a) {
+					if(typeof a == 'string') {
+						self.zsAttrs.push(a);
+					} else if (typeof a == 'object') {
+						for(var i in a) {
+							!self.zsEvts[i] && (self.zsEvts[i] = []);
+							self.zsEvts[i].push(a[i]);
+						}
+					}
+				});
+			} else if(typeof attr == 'string') {
+				this.zsAttrs.push(attr);
+			} else if (typeof attr == 'object') {
+				for(var i in attr) {
+					!this.zsEvts[i] && (this.zsEvts[i] = []);
+					this.zsEvts[i].push(attr[i]);
+				}
+			}
+		},
+		scoped: function() {
+			//Override this function to work with scoped elements
+		},
+		created: function() { 
+			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
+		},
+		ready: function() { 
+			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
+		},
+		attached: function() { 
+			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
+		},
+		domReady: function() { 
+			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
+		},
+		setScope: function(scope) {
+			this.scope = scope;
+			var self = this;
+			this.zsAttrs.forEach(function(attr) {
+				if(self[attr] !== undefined) {
+					var value = self[attr];
+					self.zsOrigValues[attr] = value;
+					var propObj = {};
+					propObj[attr] = {
+						get: function() {
+							return self.scope[value];
+						},
+						set: function(newVal) {
+							self.scope[value] = newVal;
+							self.scope.$apply();	
+						}
+					};
+					Object.defineProperties(self, propObj);
+				}
+			});
+			for(var i in this.zsEvts) {
+				this.addEventListener(i, function(e) {
+					self.zsEvts[i].forEach(function(evalAttr) {
+						if(self[evalAttr] !== undefined)
+							self.scope.$eval(self[evalAttr]);
+					});
+					e.preventDefault();
+				});
+			}
+			this.scoped();
+		},
+		attributeChanged: function(attrName, oldVal, newVal) {
+			if(this.scope && this.zsAttrs.indexOf(attrName) != -1) {
+				this.scope.apply();
+			}
+		}
+	})
+</script>
+</polymer>

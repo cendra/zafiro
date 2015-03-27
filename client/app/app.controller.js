@@ -3,6 +3,11 @@
 angular.module('zafiro')
 .controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location) {
     
+    $scope.polymer = "anda la osa!";
+    $scope.echo = function() {
+      alert($scope.polymer);
+    };
+
     $scope.menu = function() {
       $mdSidenav('menu').toggle();
     };
