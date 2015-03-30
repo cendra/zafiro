@@ -1,15 +1,21 @@
-<link rel="import" href="../../bower_components/core-icon/core-icon.html">
-<link rel="import" href="../../bower_components/core-icons/core-icons.html">
-<link rel="import" href="../../bower_components/core-field/core-field.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
+<link rel="import" href="../../bower_components/paper-input/paper-autogrow-textarea.html">
+<link rel="import" href="../zafiro-base/zafiro-base.html">
+<link rel="import" href="zafiro-form-input.html">
+<link rel="import" href="zafiro-form-select.html">
+<link rel="import" href="zafiro-form-textarea.html">
 
-<polymer-element name="zafiro-form" attributes="config ng-model">
+
+<polymer-element name="zafiro-form" extends="zafiro-base" attributes="zfconfig">
+	<style>
+		
+	</style>
 	<template>
 		<form id="form">
 		</form>
 	</template>
 	<script>
 		Polymer({
-			config: {},
 			publish: {
 				"ng-model": {
 					value: {},
@@ -17,7 +23,40 @@
 				}
 			},
 			ready: function() {
+				this.zfconfigChanged();
+				this.ngModel = this.ngModel||{};
+			},
+			zfconfigChanged: function() {
+				this.$.form.innerHTML = '';
+				try{
+					typeof this.zfconfig=='string' && (this.zfconfig = JSON.parse(this.zfconfig));
+				} catch(e) {
 
+				}
+
+				if(!this.zfconfig || typeof this.zfconfig != 'object') {
+					return this.$.form.innerHTML = '<div class="message">No hay formulario para mostrar</div>'
+				}
+
+				for(var elemId in this.zfconfig) {
+					var conf = this.zfconfig[elemId];
+					conf.element = conf.element || 'input';
+
+					if(['input', 'select', 'textarea'].indexOf(conf.element) == -1) {
+						//Form Element type not supported.
+						delete this.zfconfig[elemId];
+						continue;
+					}
+
+					conf.element == 'input' && (conf.type = conf.type || 'text');
+
+					this.ngModel[elemId] = this.ngModel[elemId]||"";
+
+					var elem = document.createElement('zafiro-form-'+conf.element);
+					elem.setConfig(conf);
+					elem.setModel(this.ngModel[elemId]);
+					this.$.form.appendChild(elem);
+				};
 			}
 		});
 	</script>

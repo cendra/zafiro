@@ -5,12 +5,14 @@
 <link rel="import" href="../../bower_components/core-collapse/core-collapse.html">
 <link rel="import" href="../../bower_components/core-animation/core-animation.html">
 <link rel="import" href="../zafiro-base/zafiro-base.html">
+<link rel="import" href="../zafiro-form/zafiro-form.html">
 
-<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder">
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfconfig zfSearch placeholder">
   <template>
   	<style type="text/css">
   		:host {
   			color: black;
+        padding: 0px;
   		}
   		core-field {
   			background-color: white;
@@ -22,9 +24,13 @@
   			position: absolute;
   			top: 0px;
   			min-width: 400px;
-  			width: 100%;
+  			right: 0px;
   			left: 0px;
+        padding: 10px;
   		}
+      col-container {
+        width: 100%;
+      }
 
   		.hidden {
   			display: none;
@@ -32,7 +38,7 @@
   	</style>
   	<core-field>
   		<core-icon icon="search"></core-icon>
-	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{ngModel}}" flex/>
+	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{ngModel.allFields}}" flex/>
 	    <core-icon id="colIcon" on-click="{{colToggle}}" icon="arrow-drop-down">
         <core-animation id="rotateCW" target="{{$.colIcon}}" duration="300">
           <core-animation-keyframe>
@@ -52,16 +58,15 @@
         </core-animation>
       </core-icon>
 	</core-field>
-	<div relative>
+	<div class="col-container" relative>
 		<core-collapse id="collapse">
-	    	Algo de algo.
+	    	<zafiro-form zfconfig="{{zfconfig}}" ngmodel="{{zs_.origValues.ngModel}}"></zafiro-form>
 		</core-collapse>
 	</div>
   </template>
   <script>
   	Polymer({
   		scoped: function() {
-  			this.ngModel += ' menos la menor!';
         var self = this;
   			this.$.buscar.addEventListener('keypress', function(event) {
           if(event.keyCode == 13) {
@@ -87,7 +92,7 @@
         //call zafiro-base ready method
   			this.super();
 
-        this.zfConfigChanged();
+        this.zfconfigChanged();
 
         //Animation for dropdown icon
         var self = this;
@@ -98,9 +103,9 @@
           self.$.colIcon.icon = 'arrow-drop-up';
         });
   		},
-      zfConfigChanged: function() {
+      zfconfigChanged: function() {
         //Hide dropdown if no configuration was found
-        if(!this.zfConfig) {
+        if(!this.zfconfig) {
           this.$.colIcon.className = 'hidden';
         } else {
           this.$.colIcon.className = '';

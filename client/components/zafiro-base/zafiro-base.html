@@ -33,6 +33,7 @@
 			//Override this function to work with scoped elements
 		},
 		created: function() { 
+			this.setAttribute('zf-polymer', true);
 			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
 		},
 		ready: function() { 
@@ -59,13 +60,93 @@
 					attribute.nodeValue = m[1];
 				}
 			});
+
+			var mkObserver = function(obj, cb, path) {
+				if(!obj || typeof obj != 'object') return;
+				path = path || [];
+				Object.observe(obj, function(changes) {
+					changes.forEach(function(change) {
+						if(['add', 'update'].indexOf(change.type) !== -1) {
+							var tmpPath = [];
+							path.forEach(function(step) {
+								tmpPath.push(step);
+							});
+							tmpPath.push(change.name);
+							mkObserver(obj[change.name], cb, tmpPath);
+						}
+					});
+					cb && cb(changes, path);
+				});
+				for(var i in obj) {
+					var tmpPath = [];
+					path.forEach(function(step) {
+						tmpPath.push(step);
+					});
+					tmpPath.push(i);
+					mkObserver(obj[i], cb, tmpPath);
+				}
+			};
+
 			this.zs_.attrs.forEach(function(attrName) {
 				var scopeProp = self[attrName];
 				self.zs_.origValues[attrName] = scopeProp;
 				self.zs_.reverseValues[scopeProp] = attrName;
 				self[attrName] = self.scope[scopeProp];
+
+				mkObserver(self[attrName], function(changes, path) {
+					changes.forEach(function(change) {
+						var tmpPath = [];
+						path.forEach(function(step) {
+							tmpPath.push(step);
+						});
+						tmpPath.push(change.name);
+						var scopeProp = self.zs_.origValues[tmpPath.shift()];
+						if(scopeProp) {
+							!self.scope.hasOwnProperty(scopeProp) && (self.scope[scopeProp] = {});
+							var scopeElem = self.scope[scopeProp];
+							while(tmpPath.length) {
+								scopeProp = tmpPath.shift();
+								!scopeElem.hasOwnProperty(scopeProp) && (scopeElem[scopeProp] = {});
+								scopeElem = scopeElem[scopeProp];
+							}
+							if(change.object[change.name] != scopeElem) {
+								scopeElem = change.object[change.name];
+							}
+						}
+					});
+				});
+
+				mkObserver(self.scope[scopeProp], function(changes, path) {
+					self.scope.$apply();
+					changes.forEach(function(change) {
+						var tmpPath = [];
+						path.forEach(function(step) {
+							tmpPath.push(step);
+						});
+						tmpPath.push(change.name);
+						var selfProp = self.zs_.reverseValues[tmpPath.shift()];
+						if(selfProp) {
+							!self.hasOwnProperty(selfProp) && (self[selfProp] = {});
+							var selfElem = self.scope[selfProp];
+							while(tmpPath.length) {
+								selfProp = tmpPath.shift();
+								!selfElem.hasOwnProperty(selfProp) && (selfElem[selfProp] = {});
+								selfElem = selfElem[selfProp];
+							}
+							if(change.object[change.name] != selfElem) {
+								selfElem = change.object[change.name];
+							}
+						}
+					});
+				});
+
 			});
-			Object.observe(self, function(changes) {
+
+
+			
+
+
+			/*Object.observe(self, function(changes) {
 				changes.forEach(function(change) {
 					var scopeProp = self.zs_.origValues[change.name];
 					if(scopeProp && change.object[change.name] != self.scope[scopeProp]) {
@@ -81,7 +162,7 @@
 						self[attrName] = change.object[change.name];
 					}
 				});
-			});
+			});*/
 			for(var i in this.zs_.evts) {
 				this.addEventListener(i, function(e) {
 					self.zs_.evts[i].forEach(function(evalAttr) {
@@ -91,7 +172,12 @@
 					e.preventDefault();
 				});
 			}
-			this.scoped();
+			if(this.scoped() !== false) {
+				var zfElems = this.shadowRoot.querySelectorAll('*[zf-polymer=true]');
+				Array.prototype.forEach.call(zfElems, function(zfElement) {
+					zfElement.setScope(scope);
+				});
+			};
 		}
 	})
 </script>

@@ -1,0 +1,24 @@
+<link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
+<link rel="import" href="../../bower_components/paper-input/paper-autogrow-textarea.html">
+<link rel="import" href="../zafiro-base/zafiro-base.html">
+
+<polymer-element name="zafiro-form-textarea" extends="zafiro-base" attributes="id zfconfig">
+	<template>
+		<paper-input-decorator label="{{zfconfig.label}}" floatingLabel autoValidate>
+			<textarea id="{{id}}" value="{{model}}"/></textarea>
+		</paper-input-decorator>
+	</template>
+	<script>
+		Polymer({
+			setConfig: function(zfconfig) {
+				this.zfconfig = zfconfig;
+				for(var i in zfconfig.atts) {
+					this.$[this.id].setAttribute(i, zfconfig.atts[i]);
+				}
+			},
+			setModel: function(model) {
+				this.model = model
+			}
+		});
+	</script>
+</polymer-element>

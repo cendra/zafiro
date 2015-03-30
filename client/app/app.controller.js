@@ -3,10 +3,12 @@
 angular.module('zafiro')
 .controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location) {
     
-    $scope.polymer = "anda la osa!";
+    $scope.polymer = {
+      allFields: "anda la osa!"
+    };
     $scope.searchConfig = true;
     $scope.echo = function() {
-      alert($scope.polymer);
+      alert(JSON.stringify($scope.polymer));
     };
 
     $scope.menu = function() {
