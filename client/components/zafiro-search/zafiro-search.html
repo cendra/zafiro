@@ -3,9 +3,10 @@
 <link rel="import" href="../../bower_components/core-icons/core-icons.html">
 <link rel="import" href="../../bower_components/core-field/core-field.html">
 <link rel="import" href="../../bower_components/core-collapse/core-collapse.html">
+<link rel="import" href="../../bower_components/core-animation/core-animation.html">
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 
-<polymer-element name="zafiro-search" extends="zafiro-base" attributes="config ng-search">
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder">
   <template>
   	<style type="text/css">
   		:host {
@@ -17,7 +18,7 @@
   		}
   		core-collapse {
   			background-color: white;
-  			border-top: 1px solid rgba(0, 0, 0, 0.5);
+  			border: 1px solid rgba(0, 0, 0, 0.5);
   			position: absolute;
   			top: 0px;
   			min-width: 400px;
@@ -30,13 +31,29 @@
   		}
   	</style>
   	<core-field>
-  		{{ngModel}}
   		<core-icon icon="search"></core-icon>
-	    <input type="text" placeholder="Buscar" value="{{ngModel}}" flex/>
-	    <core-icon id="ddIcon" on-click="{{ddToggle}}" icon="arrow-drop-down"></core-icon>
+	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{ngModel}}" flex/>
+	    <core-icon id="colIcon" on-click="{{colToggle}}" icon="arrow-drop-down">
+        <core-animation id="rotateCW" target="{{$.colIcon}}" duration="300">
+          <core-animation-keyframe>
+            <core-animation-prop name="transform" value="rotate(0deg)"/>
+          </core-animation-keyframe>
+          <core-animation-keyframe>
+            <core-animation-prop name="transform" value="rotate(180deg)"/>
+          </core-animation-keyframe>
+        </core-animation>
+        <core-animation id="rotateCCW" target="{{$.colIcon}}" duration="300">
+          <core-animation-keyframe>
+            <core-animation-prop name="transform" value="rotate(0deg)"/>
+          </core-animation-keyframe>
+          <core-animation-keyframe>
+            <core-animation-prop name="transform" value="rotate(-180deg)"/>
+          </core-animation-keyframe>
+        </core-animation>
+      </core-icon>
 	</core-field>
 	<div relative>
-		<core-collapse id="dropdown">
+		<core-collapse id="collapse">
 	    	Algo de algo.
 		</core-collapse>
 	</div>
@@ -45,21 +62,50 @@
   	Polymer({
   		scoped: function() {
   			this.ngModel += ' menos la menor!';
-  			this.fireSearch();
+        var self = this;
+  			this.$.buscar.addEventListener('keypress', function(event) {
+          if(event.keyCode == 13) {
+            self.fireSearch();
+          }
+        });
   		},
-  		ddToggle: function () {
-  			this.$.dropdown.toggle();
+  		colToggle: function () {
+        //Toggle dropdown
+        if(this.$.collapse.opened) {
+          this.$.rotateCCW.play();
+        } else {
+          this.$.rotateCW.play();
+        }
+  			this.$.collapse.toggle();
   		},
   		created: function() {
   			this.super();
-  			this.zsAdd({'zafiro:search:done': 'ng-search'})
+        this.placeholder="Search";
+  			this.zs_.add({'zafiro:search:done': 'zfSearch'});
   		},
   		ready: function() {
+        //call zafiro-base ready method
   			this.super();
-  			if(!this.config) {
-  				this.$.ddIcon.className = 'hidden';
-  			}
+
+        this.zfConfigChanged();
+
+        //Animation for dropdown icon
+        var self = this;
+        this.$.rotateCCW.addEventListener('core-animation-finish', function() {
+          self.$.colIcon.icon = 'arrow-drop-down';
+        });
+        this.$.rotateCW.addEventListener('core-animation-finish', function() {
+          self.$.colIcon.icon = 'arrow-drop-up';
+        });
   		},
+      zfConfigChanged: function() {
+        //Hide dropdown if no configuration was found
+        if(!this.zfConfig) {
+          this.$.colIcon.className = 'hidden';
+        } else {
+          this.$.colIcon.className = '';
+        }
+      },
   		fireSearch: function() {
   			this.fire('zafiro:search:done')
   		}
