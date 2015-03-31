@@ -4,7 +4,7 @@
 <polymer-element name="zafiro-form-select" extends="zafiro-base" attributes="id zfconfig">
 	<template>
 		<paper-input-decorator label="{{zfconfig.label}}" floatingLabel autoValidate>
-			<select id="{{id}}" value="{{model}}"/>
+			<select id="{{id}}" value="{{model[elemId]}}"/>
 				<template repeat="{{opText, opId in zfconfig.options">
 					<option value="{{opId}}">{{opText}}</option>
 				</template>
@@ -19,8 +19,9 @@
 					this.$[this.id].setAttribute(i, zfconfig.atts[i]);
 				}
 			},
-			setModel: function(model) {
-				this.model = model
+			setModel: function(model, elemId) {
+				this.model = model;
+				this.elemId = elemId;
 			}
 		});
 	</script>

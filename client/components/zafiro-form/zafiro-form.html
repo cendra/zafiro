@@ -6,7 +6,7 @@
 <link rel="import" href="zafiro-form-textarea.html">
 
 
-<polymer-element name="zafiro-form" extends="zafiro-base" attributes="zfconfig">
+<polymer-element name="zafiro-form" extends="zafiro-base" attributes="zfConfig">
 	<style>
 		
 	</style>
@@ -22,29 +22,34 @@
 					reflect: true
 				}
 			},
+			created: function() {
+				this.super();
+				this.zs_.add('zfConfig');
+			},
 			ready: function() {
-				this.zfconfigChanged();
+				this.super();
+				this.zfConfigChanged();
 				this.ngModel = this.ngModel||{};
 			},
-			zfconfigChanged: function() {
+			zfConfigChanged: function() {
 				this.$.form.innerHTML = '';
 				try{
-					typeof this.zfconfig=='string' && (this.zfconfig = JSON.parse(this.zfconfig));
+					typeof this.zfConfig=='string' && (this.zfConfig = JSON.parse(this.zfConfig));
 				} catch(e) {
 
 				}
 
-				if(!this.zfconfig || typeof this.zfconfig != 'object') {
+				if(!this.zfConfig || typeof this.zfConfig != 'object') {
 					return this.$.form.innerHTML = '<div class="message">No hay formulario para mostrar</div>'
 				}
 
-				for(var elemId in this.zfconfig) {
-					var conf = this.zfconfig[elemId];
+				for(var elemId in this.zfConfig) {
+					var conf = this.zfConfig[elemId];
 					conf.element = conf.element || 'input';
 
 					if(['input', 'select', 'textarea'].indexOf(conf.element) == -1) {
 						//Form Element type not supported.
-						delete this.zfconfig[elemId];
+						delete this.zfConfig[elemId];
 						continue;
 					}
 
@@ -54,7 +59,7 @@
 
 					var elem = document.createElement('zafiro-form-'+conf.element);
 					elem.setConfig(conf);
-					elem.setModel(this.ngModel[elemId]);
+					elem.setModel(this.ngModel, elemId);
 					this.$.form.appendChild(elem);
 				};
 			}

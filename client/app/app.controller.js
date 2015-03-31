@@ -3,12 +3,25 @@
 angular.module('zafiro')
 .controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location) {
     
-    $scope.polymer = {
-      allFields: "anda la osa!"
+    $scope.searchModel = {
+      allFields: "anda la osa!",
+      nom: 'Hey!'
     };
-    $scope.searchConfig = true;
-    $scope.echo = function() {
-      alert(JSON.stringify($scope.polymer));
+    $scope.searchConfig = {
+      nom: {
+        label: 'Nombre'
+      },
+      ape: {
+        label: 'Apellido',
+        required: true
+      },
+      fn: {
+        label: 'Fecha Nacimiento',
+        type: 'date'
+      }
+    };
+    $scope.search = function() {
+      alert(JSON.stringify($scope.searchModel));
     };
 
     $scope.menu = function() {

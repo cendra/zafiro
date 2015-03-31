@@ -1,38 +1,91 @@
 <polymer-element name="zafiro-base" attributes="ngModel">
 <script>
-	Polymer({
-		zs_: {
-			attrs: ['ngModel'],
-			origValues: {},
-			reverseValues: {},
-			evts: {},
-			add: function(attr) {
-				if(attr instanceof Array) {
-					var self = this;
-					attr.forEach(function(a) {
-						if(typeof a == 'string') {
-							self.attrs.push(a);
-						} else if (typeof a == 'object') {
-							for(var i in a) {
-								!self.evts[i] && (self.evts[i] = []);
-								self.evts[i].push(a[i]);
-							}
-						}
-					});
-				} else if(typeof attr == 'string') {
-					this.attrs.push(attr);
-				} else if (typeof attr == 'object') {
-					for(var i in attr) {
-						!this.evts[i] && (this.evts[i] = []);
-						this.evts[i].push(attr[i]);
+	var zs = function() {
+		this.attrs=['ngModel'];
+		this.origValues={};
+		this.reverseValues={};
+		this.evts={}
+	};
+
+	zs.prototype.add = function(attr) {
+		if(attr instanceof Array) {
+			var self = this;
+			attr.forEach(function(a) {
+				if(typeof a == 'string') {
+					self.attrs.push(a);
+				} else if (typeof a == 'object') {
+					for(var i in a) {
+						!self.evts[i] && (self.evts[i] = []);
+						self.evts[i].indexOf(a[i])==-1 && self.evts[i].push(a[i]);
 					}
 				}
+			});
+		} else if(typeof attr == 'string') {
+			this.attrs.push(attr);
+		} else if (typeof attr == 'object') {
+			for(var i in attr) {
+				!this.evts[i] && (this.evts[i] = []);
+				this.evts[i].indexOf(attr[i])==-1 && this.evts[i].push(attr[i]);
 			}
-		},
+		}
+	};
+
+	Polymer({
 		scoped: function() {
 			//Override this function to work with scoped elements
 		},
+		zfScopeChanged: function(change, path) {
+			//Override this function to work with changed scoped elements
+		},
+		digScopeElem: function(path, name) {
+			if(!path.length) {
+				!this.scope.hasOwnProperty(name) && (this.scope[name] = {});
+				return {elem: this.scope, prop: this.zs_.origValues[name]};
+			}
+			var tmpPath = [];
+			path.forEach(function(step) {
+				tmpPath.push(step);
+			});
+			var scopeProp = this.zs_.origValues[tmpPath.shift()];
+			if(scopeProp) {
+				!this.scope.hasOwnProperty(scopeProp) && (this.scope[scopeProp] = {});
+				var scopeElem = this.scope[scopeProp];
+				while(tmpPath.length) {
+					scopeProp = tmpPath.shift();
+					!scopeElem.hasOwnProperty(scopeProp) && (scopeElem[scopeProp] = {});
+					scopeElem = scopeElem[scopeProp];
+				}
+				!scopeElem.hasOwnProperty(name) && (scopeElem[name] = {});
+				return {elem: scopeElem, prop: name};
+			}
+			return undefined;
+		},
+		digSelfElem: function(path, name) {
+			//tmpPath.push(name);
+			if(!path.length) {
+				!this.hasOwnProperty(name) && (this[name] = {});
+				return {elem: this, prop: this.zs_.reverseValues[name]};
+			}
+			var tmpPath = [];
+			path.forEach(function(step) {
+				tmpPath.push(step);
+			});
+			var selfProp = this.zs_.reverseValues[tmpPath.shift()];
+			if(selfProp && selfProp != 'scope') {
+				!this.hasOwnProperty(selfProp) && (this[selfProp] = {});
+				var selfElem = this[selfProp];
+				while(tmpPath.length) {
+					selfProp = tmpPath.shift();
+					!selfElem.hasOwnProperty(selfProp) && (selfElem[selfProp] = {});
+					selfElem = selfElem[selfProp];
+				}
+				!selfElem.hasOwnProperty(name) && (selfElem[name] = {});
+				return {elem: selfElem, prop: name};
+			}
+			return undefined;
+		},
 		created: function() { 
+			this.zs_= new zs();
 			this.setAttribute('zf-polymer', true);
 			!this.scope && this.fire("zafiro:base:scopeLookup", {elem: this});
 		},
@@ -48,16 +101,19 @@
 		setScope: function(scope) {
 			this.scope = scope;
 			var self = this;
+
 			Array.prototype.forEach.call(this.attributes, function(attribute) {
 				var m;
-				if(m = attribute.nodeValue.match(/\{\{([\w-]+)\}\}/)) {
-					try {
-						m[1] = JSON.parse(m[1]);
-					} catch(e) {
-
-					}
-					self.zs_.add(attribute.name);
-					attribute.nodeValue = m[1];
+				if(m = attribute.name.match(/^\(([\w-]+)\)$/)) {
+					var prefix = self.nodeName.split('-').join(':').toLowerCase();
+					var evt = {};
+					evt[prefix+':'+m[1]] = m[1];
+					self[m[1]] = attribute.nodeValue;
+					self.zs_.add(evt);
+				}
+				if(m = attribute.name.match(/^\[([\w-]+)\]$/)) {
+					self[m[1]] = attribute.nodeValue;
+					self.zs_.add(m[1]);
 				}
 			});
 
@@ -93,76 +149,29 @@
 				self.zs_.reverseValues[scopeProp] = attrName;
 				self[attrName] = self.scope[scopeProp];
 
-				mkObserver(self[attrName], function(changes, path) {
+				/*mkObserver(self[attrName], function(changes, path) {
 					changes.forEach(function(change) {
-						var tmpPath = [];
-						path.forEach(function(step) {
-							tmpPath.push(step);
-						});
-						tmpPath.push(change.name);
-						var scopeProp = self.zs_.origValues[tmpPath.shift()];
-						if(scopeProp) {
-							!self.scope.hasOwnProperty(scopeProp) && (self.scope[scopeProp] = {});
-							var scopeElem = self.scope[scopeProp];
-							while(tmpPath.length) {
-								scopeProp = tmpPath.shift();
-								!scopeElem.hasOwnProperty(scopeProp) && (scopeElem[scopeProp] = {});
-								scopeElem = scopeElem[scopeProp];
-							}
-							if(change.object[change.name] != scopeElem) {
-								scopeElem = change.object[change.name];
-							}
+						var se = self.digScopeElem(path, change.name);
+						if(se !== undefined && change.object[change.name] != se.elem[se.prop]) {
+							se.elem[se.prop] = change.object[change.name];
 						}
 					});
-				});
+				}, [attrName]);*/
 
 				mkObserver(self.scope[scopeProp], function(changes, path) {
 					self.scope.$apply();
-					changes.forEach(function(change) {
-						var tmpPath = [];
-						path.forEach(function(step) {
-							tmpPath.push(step);
-						});
-						tmpPath.push(change.name);
-						var selfProp = self.zs_.reverseValues[tmpPath.shift()];
-						if(selfProp) {
-							!self.hasOwnProperty(selfProp) && (self[selfProp] = {});
-							var selfElem = self.scope[selfProp];
-							while(tmpPath.length) {
-								selfProp = tmpPath.shift();
-								!selfElem.hasOwnProperty(selfProp) && (selfElem[selfProp] = {});
-								selfElem = selfElem[selfProp];
-							}
-							if(change.object[change.name] != selfElem) {
-								selfElem = change.object[change.name];
-							}
+					self.zfScopeChanged(changes, path);
+					/*changes.forEach(function(change) {
+						var se = self.digSelfElem(path, change.name);
+						if(se !== undefined && change.object[change.name] != se.elem[se.prop]) {
+							self.scopeChanged(change, path);
+							se.elem[se.prop] = change.object[change.name];
 						}
-					});
-				});
+					});*/
+				}, [scopeProp]);
 
 			});
 
-
-			
-
-
-			/*Object.observe(self, function(changes) {
-				changes.forEach(function(change) {
-					var scopeProp = self.zs_.origValues[change.name];
-					if(scopeProp && change.object[change.name] != self.scope[scopeProp]) {
-						self.scope[scopeProp] = change.object[change.name];
-					}
-				});
-			});
-			Object.observe(self.scope, function(changes) {
-				self.scope.$apply();
-				changes.forEach(function(change) {
-					var attrName = self.zs_.reverseValues[change.name];
-					if(attrName && change.object[change.name] != self[attrName]) {
-						self[attrName] = change.object[change.name];
-					}
-				});
-			});*/
 			for(var i in this.zs_.evts) {
 				this.addEventListener(i, function(e) {
 					self.zs_.evts[i].forEach(function(evalAttr) {

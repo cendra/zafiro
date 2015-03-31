@@ -46,8 +46,8 @@
           </div>
           </div>  
         </div>
-        <zafiro-search zf-polymer ngModel="polymer" zfSearch="echo()" style="width: 80%; max-width: 800px"></zafiro-search>
-        <input type="text" ng-model="polymer.allFields"/>
+        <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (done)="search()" style="width: 80%; max-width: 800px"></zafiro-search>
+
         <md-toolbar-flexible style="height: 300px">
 
         <md-toolbar-flexible-item style="font-size: 20px" animate='{"font-size": "10px", "bottom": "5px"}'>algo</md-toolbar-flexible-item>

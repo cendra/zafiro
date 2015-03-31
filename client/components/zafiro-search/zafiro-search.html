@@ -7,7 +7,7 @@
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 <link rel="import" href="../zafiro-form/zafiro-form.html">
 
-<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfconfig zfSearch placeholder">
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder">
   <template>
   	<style type="text/css">
   		:host {
@@ -38,7 +38,7 @@
   	</style>
   	<core-field>
   		<core-icon icon="search"></core-icon>
-	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{ngModel.allFields}}" flex/>
+	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{searchValue}}" flex/>
 	    <core-icon id="colIcon" on-click="{{colToggle}}" icon="arrow-drop-down">
         <core-animation id="rotateCW" target="{{$.colIcon}}" duration="300">
           <core-animation-keyframe>
@@ -60,20 +60,76 @@
 	</core-field>
 	<div class="col-container" relative>
 		<core-collapse id="collapse">
-	    	<zafiro-form zfconfig="{{zfconfig}}" ngmodel="{{zs_.origValues.ngModel}}"></zafiro-form>
+	    	<zafiro-form zfConfig="{{zfConfig}}" ngmodel="{{zs_.origValues.ngModel}}"></zafiro-form>
 		</core-collapse>
 	</div>
   </template>
   <script>
+    var debounce = function(delay) {
+      this.t;
+      this.debouncing = false;
+      var self = this;
+      return function(cb) {
+        self.debouncing = true;
+        if(self.t) clearTimeout(self.t);
+        self.t = setTimeout(function() {
+          self.debouncing = false;
+          cb();
+        }, delay);
+      };
+    };
+
   	Polymer({
   		scoped: function() {
         var self = this;
-  			this.$.buscar.addEventListener('keypress', function(event) {
+        this.debouncedKeyup = new debounce(300);
+  			this.$.buscar.addEventListener('keyup', function(event) {
           if(event.keyCode == 13) {
+            if(self.debouncedKeyup.debouncing) {
+              this.fireSearch = true;
+            }
             self.fireSearch();
+          } else {
+            var input = this;
+            self.debouncedKeyup(function(){
+              var keys = Object.keys(self.ngModel);
+              keys.splice(keys.indexOf('allFields'), 1);
+              var reg = new RegExp("(?:^|\\W)(?:("+keys.join('|')+"):)(\\s*(?:\\([^)]+\\)|\\[[^\\]]+\\]|\"[^\"]+\"|'[^']+'|\\S+))(.*)");
+              //var reg = new RegExp("(?:("+keys.join('|')+"):)\\s*(\\([^)]+\\))*");
+              var allFieldsText = [];
+              var text = input.value.trim();
+              var m;
+              while(m = text.match(reg)) {
+                if(!new RegExp("^"+m[1]+':').test(text)) {
+                  allFieldsText.push(text.split(m[1]+':')[0]);
+                }
+                self.ngModel[m[1]] = m[2];
+                text = m[3].trim();
+              }
+              if(text.length) allFieldsText.push(text);
+              self.ngModel['allFields'] = allFieldsText.join(' ');
+              if(input.fireSearch) {
+                input.fireSearch = false;
+                self.fireSearch();
+              }
+            });
+            
+            /*var m = this.value.match(reg);
+            if(m) {
+
+            }*/
           }
         });
   		},
+      zfScopeChanged: function(change, path) {
+       //this.searchValue = '';
+        /*var srchParts = [this.ngModel.allFields];
+        for(var i in this.ngModel) {
+          if(i=='allFields'||!this.ngModel[i].length) continue;
+          srchParts.push(i+':'+this.ngModel[i]);
+        }
+        this.searchValue = srchParts.join(' ');*/
+      },
   		colToggle: function () {
         //Toggle dropdown
         if(this.$.collapse.opened) {
@@ -86,13 +142,13 @@
   		created: function() {
   			this.super();
         this.placeholder="Search";
-  			this.zs_.add({'zafiro:search:done': 'zfSearch'});
+  			//this.zs_.add({'zafiro:search:done': 'zfSearch'});
   		},
   		ready: function() {
         //call zafiro-base ready method
   			this.super();
 
-        this.zfconfigChanged();
+        this.zfConfigChanged();
 
         //Animation for dropdown icon
         var self = this;
@@ -103,9 +159,9 @@
           self.$.colIcon.icon = 'arrow-drop-up';
         });
   		},
-      zfconfigChanged: function() {
+      zfConfigChanged: function() {
         //Hide dropdown if no configuration was found
-        if(!this.zfconfig) {
+        if(!this.zfConfig) {
           this.$.colIcon.className = 'hidden';
         } else {
           this.$.colIcon.className = '';
