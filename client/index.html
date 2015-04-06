@@ -31,26 +31,33 @@
     <![endif]-->
     <md-content layout="column" ng-controller="zafiroCtrl" style="height: 100%">
       <md-toolbar id="toolbar" layout="column" layout-align="start center" layout-padding>
-        <div layout="row">
-          <div class="md-toolbar-tools">
-          <div layout="row" layout-align="start center" style="width: 304px">
-            <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon> 
+        <div layout="row" style="height: 80px">
+          
+        </div>
+        
+
+        <md-toolbar-flexible style="height: 300px">
+          <md-toolbar-flexible-item id="toolbarBackground" style="top: 0px; left: 0px; bottom: 0px; right: 0px; opacity: 1" animate='{"opacity": "0"}'></md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="bottom: 10px; left: 20px">
+            <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon>
+          </md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="top: 10px; left: 540px; width: 500px" anchor="top" animate='{"left": "120px", "width": "920px"}'>
+            <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (done)="search()" style="width: 100%;"></zafiro-search>
+          </md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="bottom: 0px; left: 45px;">
             <div class="md-tile-content" layout layout-align="start center">
               <h4>{{currentTitle}}</h4>
             </div>
-          </div>
-          <img ng-if="currentApp.appImg" zf-src="{{currentApp.appImg}}" ng-click="navigate(currentApp.appImgAction, '')"/>
-          <div layout="column" class="md-tile-content">
-            <h3>{{currentApp.appTitle}}</h3>
-            <h4>{{currentApp.appDesc}}</h4>
-          </div>
-          </div>  
-        </div>
-        <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (done)="search()" style="width: 80%; max-width: 800px"></zafiro-search>
-
-        <md-toolbar-flexible style="height: 300px">
-
-        <md-toolbar-flexible-item style="font-size: 20px" animate='{"font-size": "10px", "bottom": "5px"}'>algo</md-toolbar-flexible-item>
+          </md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="width: 150px; top: 10px; left: 10px;" animate='{"top": "10px", "width": "50px"}'>
+            <img ng-if="currentApp.appImg" style="width: 100%" zf-src="{{currentApp.appImg}}" ng-click="navigate(currentApp.appImgAction, '')"/>
+          </md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="top: 0px; left: 160px" animate='{"top": "-150px"}'>
+            <div layout="column" class="md-tile-content">
+              <h3>{{currentApp.appTitle}}</h3>
+              <h4>{{currentApp.appDesc}}</h4>
+            </div>
+          </md-toolbar-flexible-item>
         </md-toolbar-flexible>
       </md-toolbar>
       <md-content layout="row" layout-align="center start" flex>

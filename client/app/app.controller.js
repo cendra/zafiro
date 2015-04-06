@@ -48,12 +48,18 @@ angular.module('zafiro')
 
     $scope.$watch('currentAppName', function(value) {
       $scope.currentApp = $scope.apps[$scope.currentAppName]||{};
+      if($scope.currentApp.appBgImg) {
+        angular.element('#toolbarBackground').css('background-image', 'url(/app/'+$scope.currentAppName+'/'+$scope.currentApp.appBgImg+')');
+      } else {
+        angular.element('#toolbarBackground').css('background-image', '');
+      }
     });
 
     $scope.$on('zfAppRouteLoaded', function(evt, app, config) {
       $scope.apps[app] = {
         appImgAction: 'main',
         appImg: config.image,
+        appBgImg: config.background,
         appTitle: config.title,
         appDesc: config.description,
         sideNav: []

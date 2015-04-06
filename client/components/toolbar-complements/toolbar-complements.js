@@ -25,7 +25,11 @@ angular.module('material.components.toolbar')
           	var debouncedContentScroll = $$rAF.throttle(onContentScroll);
 
           	var scrollBlock = function(e) {
-          		e.preventDefault();
+          		if(wrapper.height() > 0) {
+          			contentElement.scrollTop(0);
+          			e.preventDefault();
+          			e.stopPropagation();
+          		}
           	};
           	//var debouncedUpdateHeight = $mdUtil.debounce(updateToolbarHeight, 5 * 1000);
 
@@ -51,6 +55,7 @@ angular.module('material.components.toolbar')
 		            }
 					//flexibleHeight = element.prop('offsetHeight');
 		            newContentEl.on('wheel', debouncedContentScroll);
+		            newContentEl.on('scroll', scrollBlock);
 		            newContentEl.attr('flexible-shrink', 'true');
 
 		            contentElement = newContentEl;
@@ -77,7 +82,7 @@ angular.module('material.components.toolbar')
 	        function onContentScroll(e) {
 	          if(contentElement.scrollTop() == 0) {
 	          	var orgEvent = e.originalEvent;
-	          	var deltaY = orgEvent.deltaY || orgEvent.detail || orgEvent.wheelDelta / 40;
+	          	var deltaY = (orgEvent.deltaY || orgEvent.detail || orgEvent.wheelDelta / 40) * -1;
 	          	
 	          	if((deltaY < 0 && wrapper.height() > 0) || (deltaY > 0 && wrapper.height() < element.height())) {
 	          		e.preventDefault();
@@ -96,7 +101,6 @@ angular.module('material.components.toolbar')
 			        wrapper.css('height', (wrapper.height()+delta)+'px');
 			        element.trigger('$mdToolbarFlexibleResize', [(element.height()-wrapper.height())/element.height(), element]);				        
 	          	}
-
 	          } 
 	        }
 	  	}
@@ -131,21 +135,54 @@ angular.module('material.components.toolbar')
 	    				element.css('position', 'absolute').css(anchor, anchorPos);
 	    			}
 
-	    			for(var i in attr.animate) {
-	    				var iniState = element.css(i).match(/^([\d.]+)(\D*)/);
-	    				var toState = attr.animate[i].match(/^([\d.]+)(\D*)/);
-	    				var iniValue = parseInt(iniState[1],10);
-	    				var toValue = parseInt(toState[1],10);
-	    				state[i] = {ini: iniValue, diff: toValue - iniValue, unit: iniState[2]};
+	    			if(attr.animate) {
+		    			var dummy = angular.element('<div></div>').appendTo(toolbar).css(attr.animate);
+		    			for(var i in attr.animate) {
+		    				var iniMatch, toMatch;
+		    				var functionReg = /^(\w+)\((.+)\)$/;
+		    				var numberReg = /^((?:-)?[\d.]+)(\D*)/;
+		    				//var hexcolorReg = /^#([0-9a-f]{3}|[0-9a-f]{6})/;
+		    				if(iniMatch = element.css(i).match(functionReg)) {
+		    					toMatch = dummy.css(i).match(functionReg);
+		    					state[i] = {fn: iniMatch[1], attr: []};
+		    					var iniAttr = iniMatch[2].split(',').map(function(item) {return item.trim()});
+		    					var toAttr = toMatch[2].split(',').map(function(item) {return item.trim()});
+		    					for(var j = 0; j < iniAttr.length; j++) {
+		    						var iniAttrMatch = iniAttr[j].match(numberReg);
+		    						var toAttrMatch = toAttr[j].match(numberReg);
+		    						var iniValue = parseFloat(iniAttrMatch[1],10);
+			    					var toValue = parseFloat(toAttrMatch[1],10);
+		    						state[i].attr.push({ini: iniValue, diff: toValue - iniValue, unit: iniAttrMatch[2]});
+		    					}
+		    				} else {
+		    					iniMatch = element.css(i).match(numberReg);
+			    				toMatch = dummy.css(i).match(numberReg);
+			    				var iniValue = parseFloat(iniMatch[1],10);
+			    				var toValue = parseFloat(toMatch[1],10);
+			    				state[i] = {ini: iniValue, diff: toValue - iniValue, unit: iniMatch[2]};
+		    				}
+		    			}
+		    			dummy.remove();
 	    			}
-
 	    			toolbar.append(element);
 
 					flexible.on('$mdToolbarFlexibleResize', function(e, ratio, flexible) {
 						var tmpState = {};
-						for(var i in state) {
-							tmpState[i] = (Math.round((state[i].ini + (state[i].diff * ratio)) * 100) / 100) + (state[i].unit||'');
+						var getValue = function(state) {
+							return (Math.round((state.ini + (state.diff * ratio)) * 100) / 100) + (state.unit||'');
 						}
+						for(var i in state) {
+							if(state[i].fn) {
+								var tmpAttr = [];
+								state[i].attr.forEach(function(attr) {
+									tmpAttr.push(getValue(attr));
+								});
+								tmpState[i] = state[i].fn+'('+tmpAttr.join(', ')+')';
+							} else {
+								tmpState[i] = getValue(state[i]);
+							}
+						}
+
 			    		element.css(tmpState);
 			    	});	    			
 	    		}

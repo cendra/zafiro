@@ -80,55 +80,130 @@
     };
 
   	Polymer({
-  		scoped: function() {
-        var self = this;
-        this.debouncedKeyup = new debounce(300);
-  			this.$.buscar.addEventListener('keyup', function(event) {
-          if(event.keyCode == 13) {
-            if(self.debouncedKeyup.debouncing) {
-              this.fireSearch = true;
-            }
-            self.fireSearch();
-          } else {
-            var input = this;
-            self.debouncedKeyup(function(){
-              var keys = Object.keys(self.ngModel);
-              keys.splice(keys.indexOf('allFields'), 1);
-              var reg = new RegExp("(?:^|\\W)(?:("+keys.join('|')+"):)(\\s*(?:\\([^)]+\\)|\\[[^\\]]+\\]|\"[^\"]+\"|'[^']+'|\\S+))(.*)");
-              //var reg = new RegExp("(?:("+keys.join('|')+"):)\\s*(\\([^)]+\\))*");
-              var allFieldsText = [];
-              var text = input.value.trim();
-              var m;
-              while(m = text.match(reg)) {
-                if(!new RegExp("^"+m[1]+':').test(text)) {
-                  allFieldsText.push(text.split(m[1]+':')[0]);
-                }
-                self.ngModel[m[1]] = m[2];
-                text = m[3].trim();
-              }
-              if(text.length) allFieldsText.push(text);
-              self.ngModel['allFields'] = allFieldsText.join(' ');
-              if(input.fireSearch) {
-                input.fireSearch = false;
-                self.fireSearch();
-              }
-            });
-            
-            /*var m = this.value.match(reg);
-            if(m) {
+  		searchValueChanged: function() {
+  			var config, tokenArray=[], match, text, self=this;
+  			this.debouncedKeyup(function() {
+	  			if(self.scope.hasOwnProperty(self.zfConfig)) {
+	  				config = self.scope[self.zfConfig];
+	  			} else if(typeof self.zfConfig=='string') {
+	  				try {
+	  					config = JSON.parse(self.zfConfig);
+	  				} catch(e) {
 
-            }*/
-          }
-        });
+	  				}
+	  			} else if(typeof self.zfConfig == 'object') {
+	  				config = self.zfConfig;
+	  			}
+	  			if(!config) return;
+	  			var keys = Object.keys(config);
+	            var reg = new RegExp("(?:^|\\W)(?:("+keys.join('|')+"):)(\\s*(?:\\([^)]+|\\[[^\\]]+|\"[^\"]+|'[^']+)(?:\\)|\\]|\"|')?|\\S+)(.*)");
+	  			text = self.searchValue;
+	  			while(match = text.match(reg)) {
+	                if(!new RegExp("^"+match[1]+':').test(text)) {
+	                  tokenArray.push({key: 'allFields', value: (text.split(match[1]+':')[0].trim())});
+	                }
+	                var token = {key: match[1]};
+	                var submatch;
+	                if(submatch = match[2].match(/^(\s)/)) {
+	                	token.prespace = submatch[1];
+	                	match[2] = match[2].substring(submatch[1].length);
+	                } else {
+	                	token.prespace = '';
+	                }
+	                if(submatch = match[2].match(/^("|')/)) {
+	                	token.grouping = submatch[1];
+	                	match[2] = match[2].replace(new RegExp(submatch[1], 'g'), '');
+	                } else {
+	                	token.grouping = '';
+	                }
+	                token.value = match[2];
+	                tokenArray.push(token);
+	                text = match[3].trim();
+	            }
+	            if(text.length) {
+	            	tokenArray.push({key: 'allFields', value: text});
+	            }
+	            if(self.tokenArray != tokenArray) {
+	            	self.tokenArray = tokenArray;
+	            	var assinged = {};
+	            	self.allFields = [];
+	            	self.tokenArray.forEach(function(token) {
+	            		if(token.key == 'allFields') {
+	            			self.allFields.push(token.value);
+	            		} else if(!assinged[token.key]) {
+	            			assinged[token.key] = true;
+	            			if(self.ngModel[token.key].trim() != token.value.trim()) {
+	            				self.ngModel[token.key] = token.value;
+	            			}
+	            		}
+	            	});
+	            };
+	        });
+  		},
+  		scoped: function() {
+	        var self = this;
+	        this.debouncedKeyup = new debounce(300);
+  			this.$.buscar.addEventListener('keyup', function(event) {
+	          if(event.keyCode == 13) {
+	            self.fireSearch();
+	          } 
+	        });
   		},
       zfScopeChanged: function(change, path) {
-       //this.searchValue = '';
-        /*var srchParts = [this.ngModel.allFields];
-        for(var i in this.ngModel) {
-          if(i=='allFields'||!this.ngModel[i].length) continue;
-          srchParts.push(i+':'+this.ngModel[i]);
-        }
-        this.searchValue = srchParts.join(' ');*/
+      	!this.tokenArray && (this.tokenArray=[]);
+      	var changed = false;
+      	var self = this;
+       	for(var i in this.ngModel) {
+       		if(!this.ngModel[i]) {
+       			this.tokenArray = this.tokenArray.filter(function(token, index) {
+       				if(token.key == i) {
+       					changed = true;
+       					return false;
+       				}
+       				return true;
+       			});
+       			continue;
+       		}
+       		var allFieldsText='';
+       		var inTokenArray = false;
+       		if(i=='allFields') {
+       			inTokenArray=true;
+       			allFieldsText=self.ngModel[i].trim();
+       		}
+       		this.tokenArray.forEach(function(token) {
+       			if(token.key != 'allFields' && token.key == i && !inTokenArray) {
+       				inTokenArray = true;
+       				if(token.value != self.ngModel[i]) {
+	       				token.value = self.ngModel[i];
+	       				var match = self.ngModel[i].match(/^(\(|\[)/);
+	       				/*if(match && !new RegExp(".+\\"+(match[1]=='('?')':']')+'.*').test(self.ngModel[i])) {
+	       					self.ngModel[i] += match[1]=='('?')':']';
+	       				}*/
+	       				token.grouping = (!match||new RegExp(".+\\"+(match[1]=='('?')':']')+'.+').test(self.ngModel[i]))&&self.ngModel[i].split(' ').length>1?(token.grouping?token.grouping:'"'):'';
+	       				changed = true;
+	       			}
+       			} else if(i=='allFields' && token.key == i && token.value.trim() == allFieldsText.substring(0, token.value.trim().length)) {
+       				allFieldsText = allFieldsText.substring(token.value.trim().length).trim();
+       			}
+       		});
+       		if(!inTokenArray||allFieldsText.length) {
+       			changed = true;
+       			var match = this.ngModel[i].match(/^(\(|\[)/);
+/*    			if(match && !new RegExp(".+\\"+(match[1]=='('?')':']')+'.*').test(self.ngModel[i])) {
+					self.ngModel[i] += match[1]=='('?')':']';
+				}*/
+       			this.tokenArray.push({key: i, value: i=='allFields'?allFieldsText:this.ngModel[i], grouping:(!match||new RegExp(".+\\"+match[1]=='('?')':']'+'.+').test(this.ngModel[i]))&&this.ngModel[i].split(' ').length>1?'"':'', prespace: ''});
+       		}
+       	}
+       	if(changed) {
+       		this.searchValue = this.tokenArray.map(function(token) {
+       			if(token.key=='allFields') {
+       				return token.value;
+       			} else {
+       				return token.key+':'+token.prespace+token.grouping+token.value+token.grouping;
+       			}
+       		}).join(' ');
+       	}
       },
   		colToggle: function () {
         //Toggle dropdown
@@ -141,7 +216,7 @@
   		},
   		created: function() {
   			this.super();
-        this.placeholder="Search";
+        	this.placeholder="Search";
   			//this.zs_.add({'zafiro:search:done': 'zfSearch'});
   		},
   		ready: function() {
@@ -168,6 +243,14 @@
         }
       },
   		fireSearch: function() {
+  			/*this.tokenArray = this.tokenArray.filter(function(token, index) {
+   				if(token.key == 'allFields') {
+   					return false;
+   				}
+   				return true;
+   			});
+   			var allFieldsText = this.allFields.join(' ');*/
+  			this.ngModel.allFields = this.allFields.join(' ');
   			this.fire('zafiro:search:done')
   		}
   	});
