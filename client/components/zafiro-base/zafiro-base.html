@@ -105,9 +105,10 @@
 			Array.prototype.forEach.call(this.attributes, function(attribute) {
 				var m;
 				if(m = attribute.name.match(/^\(([\w-]+)\)$/)) {
-					var prefix = self.nodeName.split('-').join(':').toLowerCase();
+					//var prefix = self.nodeName.split('-').join(':').toLowerCase();
 					var evt = {};
-					evt[prefix+':'+m[1]] = m[1];
+					//evt[prefix+':'+m[1]] = m[1];
+					evt[m[1]] = m[1];
 					self[m[1]] = attribute.nodeValue;
 					self.zs_.add(evt);
 				}
@@ -157,19 +158,38 @@
 						}
 					});
 				}, [attrName]);*/
-
-				mkObserver(self.scope[scopeProp], function(changes, path) {
-					self.scope.$apply();
-					self.zfScopeChanged(changes, path);
-					/*changes.forEach(function(change) {
-						var se = self.digSelfElem(path, change.name);
-						if(se !== undefined && change.object[change.name] != se.elem[se.prop]) {
-							self.scopeChanged(change, path);
-							se.elem[se.prop] = change.object[change.name];
+				Object.observe(self.scope, function(changes) {
+					changes.forEach(function(change) {
+						if(change.name == scopeProp && ['add', 'update'].indexOf(change.type) !== -1) {
+							self[attrName] = self.scope[scopeProp];
+							mkObserver(self.scope[scopeProp], function(changes, path) {
+								self.scope.$apply();
+								self.zfScopeChanged(changes, path);
+								/*changes.forEach(function(change) {
+									var se = self.digSelfElem(path, change.name);
+									if(se !== undefined && change.object[change.name] != se.elem[se.prop]) {
+										self.scopeChanged(change, path);
+										se.elem[se.prop] = change.object[change.name];
+									}
+								});*/
+							}, [scopeProp]);
 						}
-					});*/
-				}, [scopeProp]);
-
+					});
+				});
+				var mkObserverCaller = function() {
+					mkObserver(self.scope[scopeProp], function(changes, path) {
+						self.scope.$apply();
+						self.zfScopeChanged(changes, path);
+						/*changes.forEach(function(change) {
+							var se = self.digSelfElem(path, change.name);
+							if(se !== undefined && change.object[change.name] != se.elem[se.prop]) {
+								self.scopeChanged(change, path);
+								se.elem[se.prop] = change.object[change.name];
+							}
+						});*/
+					}, [scopeProp]);
+				};
+				mkObserverCaller();
 			});
 
 			for(var i in this.zs_.evts) {

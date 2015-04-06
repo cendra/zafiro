@@ -60,7 +60,7 @@
 	</core-field>
 	<div class="col-container" relative>
 		<core-collapse id="collapse">
-	    	<zafiro-form zfConfig="{{zfConfig}}" ngmodel="{{zs_.origValues.ngModel}}"></zafiro-form>
+	    	<zafiro-form zfConfig="{{zfConfig}}" ngmodel="{{zs_.origValues.ngModel}}" on-submit="{{fireSearch}}"></zafiro-form>
 		</core-collapse>
 	</div>
   </template>
@@ -149,6 +149,9 @@
 	          } 
 	        });
   		},
+      attached: function() {
+        this.$.collapse.addListeners(this.$.collapse);
+      },
       zfScopeChanged: function(change, path) {
       	!this.tokenArray && (this.tokenArray=[]);
       	var changed = false;
@@ -216,7 +219,7 @@
   		},
   		created: function() {
   			this.super();
-        	this.placeholder="Search";
+        this.placeholder="Search";
   			//this.zs_.add({'zafiro:search:done': 'zfSearch'});
   		},
   		ready: function() {
@@ -251,7 +254,7 @@
    			});
    			var allFieldsText = this.allFields.join(' ');*/
   			this.ngModel.allFields = this.allFields.join(' ');
-  			this.fire('zafiro:search:done')
+  			this.fire('search')
   		}
   	});
   </script>

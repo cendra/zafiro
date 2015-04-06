@@ -3,7 +3,6 @@
 // Development specific configuration
 // ==================================
 module.exports = {
-  // MongoDB connection options
   	auth: {
 		loginUrl: "/yuli/login",
 		returnParam: "returnUrl",
@@ -23,5 +22,8 @@ module.exports = {
 		clientID: "123123123",
 		clientSecret: "321321321",
 		site: "http://localhost:8089"
+	},
+	organization: {
+		image: "/assets/images/unc.png"
 	}
 };

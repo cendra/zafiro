@@ -15,6 +15,10 @@ var bower = require('bower');
 
 var router = express.Router();
 
+router.get('/organization', function(req, res, next) {
+	res.json(config.organization);
+});
+
 router.get('/module', function (req, res, next) {
 	fs.readdir(appsPath, function(err, modules) {
 		if(err) return next(err);

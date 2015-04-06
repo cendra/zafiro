@@ -1,27 +1,22 @@
 'use strict';
 
 angular.module('zafiro')
-.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location) {
+.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location, $http, zafiro) {
+
+    $http.get('/api/zafiro/organization')
+    .success(function(data) {
+      $scope.orgImage = data.image;
+    });
+
+    zafiro.searchConfigChanged(function(config) {
+      $scope.searchConfig = config;
+    });
+
+    $scope.searchModel = {};
+    $scope.searchConfig = {};
     
-    $scope.searchModel = {
-      allFields: "anda la osa!",
-      nom: 'Hey!'
-    };
-    $scope.searchConfig = {
-      nom: {
-        label: 'Nombre'
-      },
-      ape: {
-        label: 'Apellido',
-        required: true
-      },
-      fn: {
-        label: 'Fecha Nacimiento',
-        type: 'date'
-      }
-    };
     $scope.search = function() {
-      alert(JSON.stringify($scope.searchModel));
+      zafiro.performSearch($scope.searchModel);
     };
 
     $scope.menu = function() {
@@ -53,6 +48,9 @@ angular.module('zafiro')
       } else {
         angular.element('#toolbarBackground').css('background-image', '');
       }
+      if($scope.currentApp.searchConfig) {
+        $scope.searchConfig = $scope.currentApp.searchConfig;
+      }
     });
 
     $scope.$on('zfAppRouteLoaded', function(evt, app, config) {
@@ -62,8 +60,10 @@ angular.module('zafiro')
         appBgImg: config.background,
         appTitle: config.title,
         appDesc: config.description,
-        sideNav: []
+        sideNav: [],
+        searchConfig: config.search
       };
+      $scope.searchConfig = config.search;
       setSideNav($scope.apps[app], config.routes.children, 'root.'+app+'.');
       $scope.currentAppName = app;
     });

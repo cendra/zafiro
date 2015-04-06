@@ -6,6 +6,10 @@ angular.module('zafiro')
     var wsdl = {};
     var socket = {};
     var self = this;
+    var searchConf = null;
+    var searchConfListeners = [];
+    var perfomedSearchListeners = [];
+
 
     this.setRest = function(name, restBase) {
       if(!name) return rest={};
@@ -32,6 +36,23 @@ angular.module('zafiro')
       }
       !sockBase&&(sockBase=name)&&(name='default');
       socket[name] = io.connect(sockBase);
+    };
+
+    this.setSearchConf = function(conf) {
+      searchConf = conf;
+      perfomedSearchListeners = [];
+      searchConfListeners.forEach(function(fn) {
+        fn(conf);
+      });
+    };
+
+    this.onSearch = function(fn) {
+      perfomedSearchListeners.push(fn);
+    };
+
+    this.searchConfigChanged = function(fn) {
+      searchConfListeners.push(fn);
+      searchConf && fn(searchConf);
     };
 
     this.$get = ['$http', '$soap',  function($http, $soap) {
@@ -114,6 +135,26 @@ angular.module('zafiro')
           .error(function(data) {
             error&&error(data);
             console.log(data);
+          });
+          return this;
+        },
+        onSearch: function(fn) {
+          perfomedSearchListeners.push(fn);
+        },
+        searchConfigChanged: function(fn) {
+          searchConfListeners.push(fn);
+          searchConf && fn(searchConf);
+        },
+        setSearchConf: function(conf) {
+          searchConf = conf;
+          perfomedSearchListeners = [];
+          searchConfListeners.forEach(function(fn) {
+            fn(conf);
+          });
+        },
+        performSearch: function(searchParams) {
+          perfomedSearchListeners.forEach(function(fn) {
+            fn(searchParams);
           });
         }
       }

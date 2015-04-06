@@ -16,12 +16,6 @@
 	</template>
 	<script>
 		Polymer({
-			publish: {
-				"ng-model": {
-					value: {},
-					reflect: true
-				}
-			},
 			created: function() {
 				this.super();
 				this.zs_.add('zfConfig');
@@ -30,6 +24,13 @@
 				this.super();
 				this.zfConfigChanged();
 				this.ngModel = this.ngModel||{};
+			},
+			domReady: function(){
+				var self = this;
+				this.$.form.addEventListener('submit', function(event) {
+					event.preventDefault();
+					self.fire('submit');
+				}, false);
 			},
 			zfConfigChanged: function() {
 				this.$.form.innerHTML = '';

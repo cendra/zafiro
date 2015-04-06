@@ -60,6 +60,7 @@ angular.module('material.components.toolbar')
 
 		            contentElement = newContentEl;
 		            //$$rAF(updateToolbarHeight);
+		            element.toolbarFlexibleLoaded = true;
 		            scope.$broadcast('$mdToolbarFlexibleLoaded', element, wrapper.parent());
 		        }
 	        }
@@ -94,6 +95,9 @@ angular.module('material.components.toolbar')
 			            deltaY *= pageHeight;
 			        }
 			        var delta = deltaY * shrinkSpeedFactor;
+			        if(wrapper.height()+delta > element.height()) {
+			        	delta = element.height() - wrapper.height();
+			        }
 		          	element.css(
 			            $mdConstant.CSS.TRANSFORM,
 			            'translate3d(0,' + delta + 'px,0)'
@@ -117,7 +121,8 @@ angular.module('material.components.toolbar')
 	    		anchor,
 	    		anchorPos,
 	    		state = {};
-	    	scope.$on('$mdToolbarFlexibleLoaded', function(event, flexible, toolbar) {
+
+	    	var toolbarFlexibleLoaded = function(event, flexible, toolbar) {
 	    		if(parentFlexible == flexible[0]) {
 	    			anchor = attr.anchor||'bottom';
 	    			anchorPos = element.css(anchor);
@@ -186,7 +191,13 @@ angular.module('material.components.toolbar')
 			    		element.css(tmpState);
 			    	});	    			
 	    		}
-	    	});
+	    	};
+
+	    	if(parentFlexible.toolbarFlexibleLoaded) {
+	    		toolbarFlexibleLoaded(null, parentFlexible, parentFlexible.parent());
+	    	} else {
+	    		scope.$on('$mdToolbarFlexibleLoaded', toolbarFlexibleLoaded);
+	    	}
 	    }
 	};
   }
