@@ -1,10 +1,10 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 
-<polymer-element name="zafiro-form-select" extends="zafiro-base" attributes="id zfconfig">
+<polymer-element name="zafiro-form-select" extends="zafiro-base" attributes="zfconfig">
 	<template>
 		<paper-input-decorator label="{{zfconfig.label}}" floatingLabel autoValidate>
-			<select id="{{id}}" value="{{model[elemId]}}"/>
+			<select id="{{elemId}}" value="{{model[elemId]}}"/>
 				<template repeat="{{opText, opId in zfconfig.options">
 					<option value="{{opId}}">{{opText}}</option>
 				</template>

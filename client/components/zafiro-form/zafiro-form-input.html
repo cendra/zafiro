@@ -1,14 +1,17 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 
-<polymer-element name="zafiro-form-input" extends="zafiro-base" attributes="id zfconfig">
+<polymer-element name="zafiro-form-input" extends="zafiro-base" attributes="zfconfig">
 	<template>
-		<paper-input-decorator label="{{zfconfig.label}}" floatingLabel autoValidate>
-			<input id="{{id}}" value="{{model[elemId]}}" type="{{zfconfig.type}}"/>
+		<paper-input-decorator id="dec" label="{{zfconfig.label}}" floatingLabel autoValidate isInvalid="{{isInvalid}}">
+			<input id="{{elemId}}" value="{{model[elemId]}}" type="{{zfconfig.type}}"/>
 		</paper-input-decorator>
 	</template>
 	<script>
 		Polymer({
+			publish: {
+				isInvalid: {value: false, reflect: true}
+			},
 			setConfig: function(zfconfig) {
 				this.zfconfig = zfconfig;
 				for(var i in zfconfig.atts) {
@@ -18,6 +21,15 @@
 			setModel: function(model, elemId) {
 				this.model = model;
 				this.elemId = elemId;
+			},
+			classNameChanged: function() {
+				this.setAttribute('class', this.class);
+			},
+			validate: function() {
+				return this.$.dec.validate();
+			},
+			isInvalidChanged: function() {
+				this.classList.toggle('invalid', this.isInvalid);
 			}
 		});
 	</script>

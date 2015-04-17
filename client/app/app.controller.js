@@ -39,6 +39,9 @@ angular.module('zafiro')
       if(app[1] && $scope.currentAppName != app[1]) {
         $scope.currentAppName = app[1];
       }
+      if(result.to.state.title) {
+        $scope.currentTitle = result.to.state.title;
+      }
     });
 
     $scope.$watch('currentAppName', function(value) {
@@ -76,11 +79,12 @@ angular.module('zafiro')
           } else if(route.sidenav) {
             if(angular.isObject(route.sidenav)) {
               route.sidenav.to = parent+route.name;
+              !route.sidenav.title && (route.sidenav.title=route.title);
               app.sideNav.push(route.sidenav);
             } else if(angular.isString(route.sidenav)) {
               app.sideNav.push({title: route.sidenav, to: parent+route.name});
             } else {
-              app.sideNav.push({title: route.name, to: parent+route.name});
+              app.sideNav.push({title: route.title||route.name, to: parent+route.name});
             }
           }
           if(route.children) {

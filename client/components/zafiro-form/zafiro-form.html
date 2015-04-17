@@ -1,9 +1,17 @@
+<link rel="import" href="../zafiro-base/zafiro-base.html">
+
 <link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
 <link rel="import" href="../../bower_components/paper-input/paper-autogrow-textarea.html">
-<link rel="import" href="../zafiro-base/zafiro-base.html">
-<link rel="import" href="zafiro-form-input.html">
+
+
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input-decorator.html">
+<!--link rel="import" href="zafiro-form-input.html">
 <link rel="import" href="zafiro-form-select.html">
 <link rel="import" href="zafiro-form-textarea.html">
+<link rel="import" href="zafiro-form-button.html"-->
 
 
 <polymer-element name="zafiro-form" extends="zafiro-base" attributes="zfConfig">
@@ -11,7 +19,51 @@
 		
 	</style>
 	<template>
-		<form id="form">
+		<!--template id="button">
+			<template if="{{elem.label}}">
+				<paper-button id="{{elemId}}" type="{{elem.type}}" flex on-click="{{doClick(elem)}}">
+					<template if="{{elem.icon}}">
+						<core-icon icon="{{elem.icon}}"></core-icon>
+					</template> {{elem.label}}
+				</paper-button>
+			</template>
+			<template if="{{!elem.label}}">
+				<paper-icon-button id="{{elemId}}" type="{{elem.type}}" icon="{{elem.icon}}" on-click="{{doClick(elem)}}">
+				</paper-icon-button>
+			</template>
+		</template>
+		<template id="input">
+			<paper-input-decorator label="{{elem.label}}" floatingLabel autoValidate>
+				<input id="{{elemId}}" value="{{ngModel[elemId]}}" type="{{elem.type}}"/>
+			</paper-input-decorator>
+		</template>
+		<template id="select">
+			<paper-input-decorator label="{{elem.label}}" floatingLabel autoValidate>
+				<select id="{{elemId}}" value="{{ngModel[elemId]}}"/>
+					<template repeat="{{opText, opId in zfconfig.options">
+						<option value="{{opId}}">{{opText}}</option>
+					</template>
+				</select>
+			</paper-input-decorator>
+		</template>
+		<template id="textarea">
+			<paper-input-decorator label="{{zfconfig.label}}" floatingLabel autoValidate>
+				<textarea id="{{elemId}}" value="{{model[elemId]}}"/></textarea>
+			</paper-input-decorator>
+		</template-->
+		<form id="form" on-submit="{{submitFn}}">
+			<!--template repeat="{{elemId in zfConfigKeys}}">
+				<template if="{{!isArray(zfConfig[elemId])}}">
+					<template bind="{{zfConfig[elemId] as elem}}" ref="{{zfConfig[elemId].element}}"></template>
+				</template>
+				<template if="{{isArray(zfConfig[elemId])}}">
+					<div layout horizontal>
+						<template repeat="{{elemId in zfConfigKeys}}">
+							<template bind="{{zfConfig[elemId] as elem}}" ref="{{zfConfig[elemId].element}}"></template>
+						</template>
+					</div>
+				</template>
+			</template-->
 		</form>
 	</template>
 	<script>
@@ -20,19 +72,113 @@
 				this.super();
 				this.zs_.add('zfConfig');
 			},
+			scoped: function() {
+				this.zfScopeChanged();
+			},
 			ready: function() {
 				this.super();
-				this.zfConfigChanged();
 				this.ngModel = this.ngModel||{};
 			},
 			domReady: function(){
 				var self = this;
-				this.$.form.addEventListener('submit', function(event) {
+				/*this.$.form.addEventListener('submit', function(event) {
 					event.preventDefault();
 					self.fire('submit');
-				}, false);
+				});*/
 			},
-			zfConfigChanged: function() {
+			submitFn: function(event, detail, sender) {
+				event.preventDefault();
+				this.fire('submit');
+			},
+			createbutton: function(conf, id) {
+				var button;				
+				if(!conf.icon || conf.label) {
+					button = document.createElement('paper-button');
+					button.setAttribute('flex', true);
+					if(conf.icon) {
+						var icon = document.createElement('core-icon');
+						icon.setAttribute('icon', conf.icon);
+						button.appendChild(icon);
+					}
+					var label = document.createTextNode(conf.label||'');
+					button.appendChild(label);
+				} else {
+					button = document.createElement('paper-icon-button');
+					button.setAttribute('icon', conf.icon);
+				}
+				var self = this;
+				button.addEventListener('click', function(evt) {
+					switch(conf.type) {
+						case "submit":
+							if(self.$.form.reportValidity()) {
+								self.fire('submit');
+							}
+							break;
+						case "reset":
+							for(var i in self.ngModel) {
+								self.ngModel[i] = '';
+							}
+							break;
+						case "button":
+							self.ngModel[id] && self.scope.$eval(self.ngModel[id]);
+							break;
+					}
+				});
+
+				return button;
+			},
+			createinput: function(conf, id) {
+				var decorator = document.createElement('paper-input-decorator');
+				decorator.setAttribute('label', conf.label);
+				decorator.setAttribute('floatingLabel', true);
+				decorator.setAttribute('autoValidate', true);
+				var input = document.createElement('input');
+				for(var i in conf.constrains) {
+					input.setAttribute(i, conf.constrains[i]);
+				}
+				input.setAttribute('id', id+'Input');
+				input.setAttribute('type', conf.type);
+				input.bind('value', new PathObserver(this.ngModel, id));
+				decorator.appendChild(input);
+				return decorator;
+			},
+			createselect: function(conf, id) {
+				var decorator = document.createElement('paper-input-decorator');
+				decorator.setAttribute('label', conf.label);
+				decorator.setAttribute('floatingLabel', true);
+				decorator.setAttribute('autoValidate', true);
+				var select = document.createElement('select');
+				for(var i in conf.constrains) {
+					select.setAttribute(i, conf.constrains[i]);
+				}
+				select.bind('value', new PathObserver(this.ngModel, id));
+				for(var i in conf.options) {
+					document.createElement('option');
+					option.setAttribute('value', i);
+					option.innerHTML = conf.options[i];
+					select.appendChild(option);
+				}
+				decorator.appendChild(select);
+				return decorator;
+			},
+			createtextarea: function(conf, parent) {
+				var decorator = document.createElement('paper-input-decorator');
+				decorator.setAttribute('label', conf.label);
+				decorator.setAttribute('floatingLabel', true);
+				decorator.setAttribute('autoValidate', true);
+				var textarea = document.createElement('textarea');
+				for(var i in conf.constrains) {
+					textarea.setAttribute(i, conf.constrains[i]);
+				}
+				textarea.bind('value', new PathObserver(this.ngModel, id));
+				decorator.appendChild(textarea);
+				return decorator;
+			},
+			focus: function() {
+				this.shadowRoot.querySelector('input, select, textarea').focus();
+			},
+			zfScopeChanged: function(change, path) {
+				if(path && path.indexOf(this.zs_.origValues.zfConfig) == -1) return;
 				this.$.form.innerHTML = '';
 				try{
 					typeof this.zfConfig=='string' && (this.zfConfig = JSON.parse(this.zfConfig));
@@ -44,25 +190,95 @@
 					return this.$.form.innerHTML = '<div class="message">No hay formulario para mostrar</div>'
 				}
 
-				for(var elemId in this.zfConfig) {
-					var conf = this.zfConfig[elemId];
+				this.zfConfigKeys = Object.keys(this.zfConfig);
+
+				var self = this;
+
+				var configureElement = function(conf, parent) {
 					conf.element = conf.element || 'input';
 
-					if(['input', 'select', 'textarea'].indexOf(conf.element) == -1) {
+					if(['input', 'select', 'textarea', 'button'].indexOf(conf.element) == -1) {
 						//Form Element type not supported.
-						delete this.zfConfig[elemId];
-						continue;
+						return true;
 					}
 
-					conf.element == 'input' && (conf.type = conf.type || 'text');
+					if(conf.element == 'input' && !conf.type) {
+						conf.type = 'text';
+						return false;
+					} 
 
-					this.ngModel[elemId] = this.ngModel[elemId]||"";
+					if(conf.element == 'input' && (conf.type == 'submit' || conf.type == 'reset' || conf.type == 'button')) {
+						conf.element = 'button';
+						return false;
+					}
 
-					var elem = document.createElement('zafiro-form-'+conf.element);
+					if(conf.element == 'button' && !conf.type) {
+						conf.type = 'button';
+						return false;
+					}
+
+					self.ngModel[elemId] = self.ngModel[elemId]||"";
+
+					var elem = self['create'+conf.element](conf, elemId);
+					elem.setAttribute('id', elemId);
+					if(conf.atts) {
+						for(var i in conf.atts) {
+							elem.setAttribute(i, conf.atts[i]);
+						}
+					}
+
+					/*var elem = document.createElement('zafiro-form-'+conf.element);
 					elem.setConfig(conf);
-					elem.setModel(this.ngModel, elemId);
-					this.$.form.appendChild(elem);
+					elem.setModel(self.ngModel, elemId);
+					if(conf.element == 'button') {
+						elem.addEventListener('click', function(evt) {
+							switch(conf.type) {
+								case "submit":
+									self.$.form.submit();
+									break;
+								case "reset":
+									for(var i in self.ngModel) {
+										self.ngModel[i] = '';
+									}
+									break;
+								case "button":
+									self.ngModel[elemId] && self.scope.$eval(self.ngModel[elemId]);
+									break;
+							}
+						});
+					}*/
+					parent.appendChild(elem);
+					return true;
+				}
+
+				for(var elemId in this.zfConfig) {
+					var conf = this.zfConfig[elemId];
+					if(conf.type && conf.type == 'container') {
+						var div = document.createElement('div');
+						var atts = {layout: true, horizontal: true};
+						for(var i in conf.atts) {
+							atts[i] = conf.atts[i];
+						}
+						for(var i in atts) {
+							div.setAttribute(i, atts[i]);
+						}
+						this.$.form.appendChild(div);
+						var doBreak = false;
+						for(var elemId in conf.children) {
+							if(doBreak = configureElement(conf.children[elemId], div)) {
+								break;
+							}
+						}
+						if(doBreak) {
+							break;
+						}
+					} else {
+						if(!configureElement(conf, this.$.form)) {
+							break;
+						}
+					}
 				};
+
 			}
 		});
 	</script>

@@ -7,7 +7,7 @@
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 <link rel="import" href="../zafiro-form/zafiro-form.html">
 
-<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder">
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder" on-blur="{{blur}}">
   <template>
   	<style type="text/css">
   		:host {
@@ -60,7 +60,7 @@
 	</core-field>
 	<div class="col-container" relative>
 		<core-collapse id="collapse">
-	    	<zafiro-form zfConfig="{{zfConfig}}" ngmodel="{{zs_.origValues.ngModel}}" on-submit="{{fireSearch}}"></zafiro-form>
+	    	<zafiro-form id="form" zfConfig="{{configName}}" ngmodel="{{modelName}}" on-submit="{{fireSearch}}"></zafiro-form>
 		</core-collapse>
 	</div>
   </template>
@@ -141,18 +141,61 @@
 	        });
   		},
   		scoped: function() {
-	        var self = this;
-	        this.debouncedKeyup = new debounce(300);
-  			this.$.buscar.addEventListener('keyup', function(event) {
-	          if(event.keyCode == 13) {
-	            self.fireSearch();
-	          } 
-	        });
+	      var self = this;
+	      this.debouncedKeyup = new debounce(300);
+  		  this.$.buscar.addEventListener('keyup', function(event) {
+	       if(event.keyCode == 13) {
+	         self.fireSearch();
+	       } 
+	      });
   		},
       attached: function() {
         this.$.collapse.addListeners(this.$.collapse);
       },
       zfScopeChanged: function(change, path) {
+        if(path.indexOf(this.zs_.origValues.zfConfig) != -1) {
+          if(this.zfConfig._buttons) return;
+          
+          function hasSubmit(config) {
+            var submitFound = false;  
+            for(var i in config) {
+              var conf = config[i];
+              if(conf instanceof Array) {
+                conf.forEach(function(conf) {
+                  if(!submitFound && (!conf.element || conf.element == 'input' || conf.element == 'button') && conf.type == 'submit') {
+                    submitFound = true;
+                  }
+                });
+                if(submitFound) break;
+              } else if((!conf.element || conf.element == 'input' || conf.element == 'button') && conf.type == 'submit') {
+                submitFound = true;
+                break;
+              }
+            }
+            return submitFound;
+          }
+          
+          if(!hasSubmit(this.zfConfig)) {
+            this.zfConfig._buttons = {
+              type: 'container',
+              atts: {
+                reverse: true
+              },
+              children: {
+                _submit: {
+                  type: 'submit',
+                  element: 'button',
+                  icon: 'search',
+                  atts: {
+                    raised: true
+                  }
+                }
+              }
+            };
+              
+          }
+          return;
+        }
       	!this.tokenArray && (this.tokenArray=[]);
       	var changed = false;
       	var self = this;
@@ -208,7 +251,7 @@
        		}).join(' ');
        	}
       },
-  		colToggle: function () {
+  		colToggle: function (close) {
         //Toggle dropdown
         if(this.$.collapse.opened) {
           this.$.rotateCCW.play();
@@ -220,10 +263,12 @@
   		created: function() {
   			this.super();
         this.placeholder="Search";
-  			//this.zs_.add({'zafiro:search:done': 'zfSearch'});
+  			this.zs_.add('zfConfig');
   		},
   		ready: function() {
         //call zafiro-base ready method
+        this.configName = this.zfConfig;
+        this.modelName = this.ngModel;
   			this.super();
 
         this.zfConfigChanged();
@@ -235,6 +280,7 @@
         });
         this.$.rotateCW.addEventListener('core-animation-finish', function() {
           self.$.colIcon.icon = 'arrow-drop-up';
+          self.$.form.focus();
         });
   		},
       zfConfigChanged: function() {
@@ -255,7 +301,12 @@
    			var allFieldsText = this.allFields.join(' ');*/
   			this.ngModel.allFields = this.allFields.join(' ');
   			this.fire('search')
-  		}
+  		},
+      blur: function() {
+        if(this.$.collapse.opened) {
+          this.colToggle();
+        }
+      }
   	});
   </script>
 </polymer-element>

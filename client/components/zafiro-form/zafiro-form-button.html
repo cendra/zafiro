@@ -1,0 +1,40 @@
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../zafiro-base/zafiro-base.html">
+
+<polymer-element name="zafiro-form-button" extends="zafiro-base" attributes="zfconfig">
+	<template>
+		<template if="{{zfconfig.label}}">
+			<paper-button id="{{elemId}}" type="{{zfconfig.type}}" flex>
+				<template if="{{zfconfig.icon}}">
+					<core-icon icon="{{zfconfig.icon}}"></core-icon>
+				</template> {{zfconfig.label}}
+			</paper-button>
+		</template>
+		<template if="{{!zfconfig.label}}">
+			<paper-icon-button id="{{elemId}}" type="{{zfconfig.type}}">
+			</paper-icon-button>
+		</template>
+	</template>
+	<script>
+		Polymer({
+			setConfig: function(zfconfig, parent) {
+				this.parent = parent;
+				this.zfconfig = zfconfig;
+			},
+			domReady: function() {
+				for(var i in this.zfconfig.atts) {
+					this.shadowRoot.querySelector('#'+this.elemId).setAttribute(i, this.zfconfig.atts[i]);
+				}
+			},
+			setModel: function(model, elemId) {
+				this.model = model;
+				this.elemId = elemId;
+			},
+			onClick: function() {
+				this.fire('click');
+			}
+		});
+	</script>
+</polymer-element>
