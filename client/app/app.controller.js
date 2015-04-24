@@ -1,16 +1,37 @@
 'use strict';
 
 angular.module('zafiro')
-.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $location, $http, zafiro) {
+.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $mdToast, $location, $http, zafiro) {
 
     $http.get('/api/zafiro/organization')
     .success(function(data) {
       $scope.orgImage = data.image;
     });
 
-    zafiro.searchConfigChanged(function(config) {
-      $scope.searchConfig = config;
-    });
+    zafiro
+      .toolbarConfChanged(function(config) {
+        $scope.toolbarConfig = config;
+      })
+      .viewToolbarConfChanged(function(config) {
+        $scope.viewToolbarConfig = config;
+      })
+      .searchConfigChanged(function(config) {
+        $scope.searchConfig = config;
+      });
+
+    $scope.toolbarFire = function(key) {
+      $scope.toolbarConfig[key] && 
+      $scope.toolbarConfig[key].action && 
+      typeof $scope.toolbarConfig[key].action == 'function' && 
+      $scope.toolbarConfig[key].action();
+    };
+
+    $scope.viewToolbarFire = function(key) {
+      $scope.viewToolbarConfig[key] && 
+      $scope.viewToolbarConfig[key].action && 
+      typeof $scope.viewToolbarConfig[key].action == 'function' && 
+      $scope.viewToolbarConfig[key].action();
+    };
 
     $scope.searchModel = {};
     $scope.searchConfig = {};
@@ -42,6 +63,10 @@ angular.module('zafiro')
       if(result.to.state.title) {
         $scope.currentTitle = result.to.state.title;
       }
+    });
+
+    $scope.$on('$transitionError', function(evt, transitionFail, error) {
+      $mdToast.showSimple(error.message);
     });
 
     $scope.$watch('currentAppName', function(value) {

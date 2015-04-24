@@ -9,6 +9,8 @@ angular.module('zafiro')
     var searchConf = null;
     var searchConfListeners = [];
     var perfomedSearchListeners = [];
+    var toolbarConf = {};
+    var toolbarConfListeners = [];
 
 
     this.setRest = function(name, restBase) {
@@ -55,7 +57,23 @@ angular.module('zafiro')
       searchConf && fn(searchConf);
     };
 
+    this.setToolbarConf = function(conf) {
+      toolbarConf = conf;
+      toolbarConfListeners.forEach(function(fn) {
+        fn(conf);
+      });
+    };
+
+    this.toolbarConfChanged = function(fn) {
+      toolbarConfListeners.push(fn);
+      toolbarConf && fn(toolbarConf);
+    };
+
+    var self = this;
+
     this.$get = ['$http', '$soap',  function($http, $soap) {
+      var viewToolbarConf = {};
+      var viewToolbarConfListeners = [];
       return {
         ptr: {
           rest: 'default', 
@@ -139,23 +157,38 @@ angular.module('zafiro')
           return this;
         },
         onSearch: function(fn) {
-          perfomedSearchListeners.push(fn);
+          self.onSearch(fn);
+          return this;
         },
         searchConfigChanged: function(fn) {
-          searchConfListeners.push(fn);
-          searchConf && fn(searchConf);
+          self.searchConfigChanged(fn);
+          return this;
         },
         setSearchConf: function(conf) {
-          searchConf = conf;
-          perfomedSearchListeners = [];
-          searchConfListeners.forEach(function(fn) {
-            fn(conf);
-          });
+          self.setSearchConf(conf);
+          return this;
         },
         performSearch: function(searchParams) {
           perfomedSearchListeners.forEach(function(fn) {
             fn(searchParams);
           });
+          return this;
+        },
+        setViewToolbarConf: function(conf) {
+          viewToolbarConf = conf;
+          viewToolbarConfListeners.forEach(function(fn) {
+            fn(conf);
+          });
+          return this;
+        },
+        viewToolbarConfChanged: function(fn) {
+          viewToolbarConfListeners.push(fn);
+          viewToolbarConf && fn(viewToolbarConf);
+          return this;
+        },
+        toolbarConfChanged: function(fn) {
+          self.toolbarConfChanged(fn);
+          return this;
         }
       }
     }];

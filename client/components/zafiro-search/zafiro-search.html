@@ -4,20 +4,26 @@
 <link rel="import" href="../../bower_components/core-field/core-field.html">
 <link rel="import" href="../../bower_components/core-collapse/core-collapse.html">
 <link rel="import" href="../../bower_components/core-animation/core-animation.html">
+<link rel="import" href="../../bower_components/core-animation/core-animation-group.html">
 <link rel="import" href="../zafiro-base/zafiro-base.html">
 <link rel="import" href="../zafiro-form/zafiro-form.html">
 
-<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder" on-blur="{{blur}}">
+<polymer-element name="zafiro-search" extends="zafiro-base" attributes="zfConfig zfSearch placeholder deployedWidth" on-blur="{{blur}}">
   <template>
   	<style type="text/css">
   		:host {
-  			color: black;
         padding: 0px;
+        /*min-width: 440px;*/
+        min-height: 40px;
   		}
-  		core-field {
+
+  		#field {
   			background-color: white;
-  			min-width: 400px
+        min-width: 440px;
+        padding-left: 32px;
+        transform: translateX(24px);
   		}
+
   		core-collapse {
   			background-color: white;
   			border: 1px solid rgba(0, 0, 0, 0.5);
@@ -32,32 +38,98 @@
         width: 100%;
       }
 
+      #colIcon {
+        cursor: pointer;
+      }
+      #fieldContainer {
+        min-height: 40px;
+        overflow: hidden;
+      }
+
+      #form {
+        color: black;
+      }
   		.hidden {
   			display: none;
   		}
   	</style>
-  	<core-field>
-  		<core-icon icon="search"></core-icon>
-	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{searchValue}}" flex/>
-	    <core-icon id="colIcon" on-click="{{colToggle}}" icon="arrow-drop-down">
-        <core-animation id="rotateCW" target="{{$.colIcon}}" duration="300">
-          <core-animation-keyframe>
-            <core-animation-prop name="transform" value="rotate(0deg)"/>
-          </core-animation-keyframe>
-          <core-animation-keyframe>
-            <core-animation-prop name="transform" value="rotate(180deg)"/>
-          </core-animation-keyframe>
-        </core-animation>
-        <core-animation id="rotateCCW" target="{{$.colIcon}}" duration="300">
-          <core-animation-keyframe>
-            <core-animation-prop name="transform" value="rotate(0deg)"/>
-          </core-animation-keyframe>
-          <core-animation-keyframe>
-            <core-animation-prop name="transform" value="rotate(-180deg)"/>
-          </core-animation-keyframe>
-        </core-animation>
-      </core-icon>
-	</core-field>
+    <div layout horizontal center relative id="fieldContainer">
+    	<core-field id="field" fit>
+  	    <input id="buscar" type="text" placeholder="{{placeholder}}" value="{{searchValue}}" flex/>
+  	    <core-icon id="colIcon" on-click="{{colToggle}}" icon="arrow-drop-down">
+          <core-animation id="rotateCW" target="{{$.colIcon}}" duration="300">
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="rotate(0deg)"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="rotate(180deg)"/>
+            </core-animation-keyframe>
+          </core-animation>
+          <core-animation id="rotateCCW" target="{{$.colIcon}}" duration="300">
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="rotate(0deg)"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="rotate(-180deg)"/>
+            </core-animation-keyframe>
+          </core-animation>
+        </core-icon>
+        <core-animation-group type="par" id="showField" >
+          <core-animation target="{{$.field}}" duration="50">
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="translateX(24px)"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="translateX(0px)"/>
+            </core-animation-keyframe>
+          </core-animation>
+          <!--core-animation target="{{$.iconSearch}}" duration="50">
+            <core-animation-keyframe>
+              <core-animation-prop name="color" value="{{inheritedColor}}"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="color" value="rgba(0, 0, 0, 1)"/>
+            </core-animation-keyframe>
+          </core-animation-->
+          <core-animation target="{{$.fieldContainer}}" duration="200">
+            <core-animation-keyframe>
+              <core-animation-prop name="width" value="24px"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="width" value="{{deployedWidth}}"/>
+            </core-animation-keyframe>
+          </core-animation>
+        </core-animation-group>
+        <core-animation-group type="par" id="hideField" >
+          <core-animation target="{{$.field}}" duration="50">
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="translateX(0px)"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="transform" value="translateX(24px)"/>
+            </core-animation-keyframe>
+          </core-animation>
+          <!--core-animation target="{{$.iconSearch}}" duration="50">
+            <core-animation-keyframe>
+              <core-animation-prop name="color" value="{{inheritedColor}}"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="color" value="rgba(0, 0, 0, 1)"/>
+            </core-animation-keyframe>
+          </core-animation-->
+          <core-animation target="{{$.fieldContainer}}" duration="200">
+            <core-animation-keyframe>
+              <core-animation-prop name="width" value="{{deployedWidth}}"/>
+            </core-animation-keyframe>
+            <core-animation-keyframe>
+              <core-animation-prop name="width" value="24px"/>
+            </core-animation-keyframe>
+          </core-animation>
+        </core-animation-group>
+
+  	</core-field>
+    <core-icon icon="search" id="iconSearch" on-click="{{fieldToggle}}"></core-icon>
+  </div>
 	<div class="col-container" relative>
 		<core-collapse id="collapse">
 	    	<zafiro-form id="form" zfConfig="{{configName}}" ngmodel="{{modelName}}" on-submit="{{fireSearch}}"></zafiro-form>
@@ -65,24 +137,12 @@
 	</div>
   </template>
   <script>
-    var debounce = function(delay) {
-      this.t;
-      this.debouncing = false;
-      var self = this;
-      return function(cb) {
-        self.debouncing = true;
-        if(self.t) clearTimeout(self.t);
-        self.t = setTimeout(function() {
-          self.debouncing = false;
-          cb();
-        }, delay);
-      };
-    };
+    
 
   	Polymer({
   		searchValueChanged: function() {
   			var config, tokenArray=[], match, text, self=this;
-  			this.debouncedKeyup(function() {
+  			this.job('searchValue', function() {
 	  			if(self.scope.hasOwnProperty(self.zfConfig)) {
 	  				config = self.scope[self.zfConfig];
 	  			} else if(typeof self.zfConfig=='string') {
@@ -138,11 +198,10 @@
 	            		}
 	            	});
 	            };
-	        });
+	        }, 300);
   		},
   		scoped: function() {
 	      var self = this;
-	      this.debouncedKeyup = new debounce(300);
   		  this.$.buscar.addEventListener('keyup', function(event) {
 	       if(event.keyCode == 13) {
 	         self.fireSearch();
@@ -154,7 +213,7 @@
       },
       zfScopeChanged: function(change, path) {
         if(path.indexOf(this.zs_.origValues.zfConfig) != -1) {
-          if(this.zfConfig._buttons) return;
+          if(!this.zfConfig || this.zfConfig._buttons) return;
           
           function hasSubmit(config) {
             var submitFound = false;  
@@ -253,15 +312,37 @@
       },
   		colToggle: function (close) {
         //Toggle dropdown
-        if(this.$.collapse.opened) {
-          this.$.rotateCCW.play();
-        } else {
-          this.$.rotateCW.play();
-        }
-  			this.$.collapse.toggle();
+        this.job('toggle', function(){
+          if((typeof close=='object' || close) && this.$.collapse.opened) {
+            this.$.rotateCCW.play();
+            this.$.collapse.toggle();
+          } else if((typeof close=='object' || !close) && !this.$.collapse.opened) {
+            this.$.rotateCW.play();
+            this.$.collapse.toggle();
+          }
+        }, 150);
   		},
+      fieldToggle: function() {
+        !this.inheritedColor && (this.inheritedColor = this.getStyle(this.$.iconSearch, 'color'));
+        if(!this.shownField) {
+          this.$.showField.play();
+        } else {
+          this.$.hideField.play();
+        }
+        this.shownField = !this.shownField;
+      },
+      getStyle: function(elem, property) {
+        if (elem.currentStyle) {
+            var value = elem.currentStyle[property];
+        } else if (window.getComputedStyle) {
+            var value = window.getComputedStyle(elem, null).getPropertyValue(property);
+        }
+        return value;
+      },
   		created: function() {
   			this.super();
+        this.deployedWidth = "472px";
+        this.shownField = false;
         this.placeholder="Search";
   			this.zs_.add('zfConfig');
   		},
@@ -281,6 +362,16 @@
         this.$.rotateCW.addEventListener('core-animation-finish', function() {
           self.$.colIcon.icon = 'arrow-drop-up';
           self.$.form.focus();
+        });
+        this.$.showField.addEventListener('core-animation-finish', function() {
+          self.$.field.style.transform = "translateX(0px)";
+          self.$.iconSearch.style.color = "rgba(0,0,0,1)";
+          self.$.fieldContainer.style.width = self.deployedWidth;
+        });
+        this.$.hideField.addEventListener('core-animation-finish', function() {
+          self.$.field.style.transform = "translateX(24px)";
+          self.$.iconSearch.style.color = self.inheritedColor;
+          self.$.fieldContainer.style.width = "24px";
         });
   		},
       zfConfigChanged: function() {
@@ -302,9 +393,9 @@
   			this.ngModel.allFields = this.allFields.join(' ');
   			this.fire('search')
   		},
-      blur: function() {
+      blur: function(event) {
         if(this.$.collapse.opened) {
-          this.colToggle();
+          this.colToggle(true);
         }
       }
   	});

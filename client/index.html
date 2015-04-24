@@ -30,10 +30,17 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
     <md-content layout="column" ng-controller="zafiroCtrl" style="height: 100%">
-      <md-toolbar id="toolbar" layout="column" layout-align="start center" layout-padding>
-        <div layout="row" style="height: 96px">
-
-
+      <md-toolbar id="toolbar" layout="column" layout-align="start center">
+        <div style="width: 100%; height: 96px" >
+          <div layout="row"  style="width: 100%; padding-right: 16px" layout-align="end center" layout-padding="15px">
+            <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (search)="search()"></zafiro-search>
+            <div ng-repeat="(i, tool) in toolbarConfig">
+              <ng-md-icon  icon="{{tool.icon}}" ng-if="tool.icon" ng-click="toolbarFire(i)"></ng-md-icon>
+              <md-tooltip ng-if="tool.tip">
+                {{tool.tip}}
+              </md-tooltip>
+            </div>
+          </div>
         </div>
         
 
@@ -41,11 +48,6 @@
           <md-toolbar-flexible-item id="toolbarBackground" style="z-index: -1; top: 0px; left: 0px; bottom: 0px; right: 0px; opacity: 1; background-size: cover" animate='{"opacity": "0"}'></md-toolbar-flexible-item>
           <md-toolbar-flexible-item style="bottom: 16px; left: 16px">
             <ng-md-icon icon="menu" ng-if="currentApp.sideNav &amp;&amp; currentApp.sideNav.length" ng-click="menu()"></ng-md-icon>
-          </md-toolbar-flexible-item>
-          <md-toolbar-flexible-item style="top: 16px; left: 640px; right: 640px; height: 16px" anchor="top" animate='{"left": "320px", "right": "320px"}'>
-            <div>
-              <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (search)="search()" style="width: 100%;"></zafiro-search>
-            </div>
           </md-toolbar-flexible-item>
           <md-toolbar-flexible-item style="bottom: 0px; left: 48px; font-size: 1em" animate='{"font-size": "0.7em"}'>
             <div class="md-tile-content" layout layout-align="start center">
@@ -58,10 +60,20 @@
           <md-toolbar-flexible-item style="width: 152px; top: 16px; left: 168px; height: 80px" anchor="top" animate='{"top": "16px", "width": "48px", "left": "64px", "height": "24px"}'>
             <img ng-if="currentApp.appImg" style="width: 100%" zf-src="{{currentApp.appImg}}" ng-click="navigate(currentApp.appImgAction, '')"/>
           </md-toolbar-flexible-item>
-          <md-toolbar-flexible-item style="top: 0px; left: 320px" animate='{"top": "-150px", "left": "160px"}'>
+          <md-toolbar-flexible-item style="top: 0px; left: 320px; width: 300px" animate='{"top": "-150px", "left": "160px"}'>
             <div layout="column" class="md-tile-content">
               <h3>{{currentApp.appTitle}}</h3>
-              <h4>{{currentApp.appDesc}}</h4>
+              <div style="font-size: 0.75em">{{currentApp.appDesc}}</div>
+            </div>
+          </md-toolbar-flexible-item>
+          <md-toolbar-flexible-item style="bottom: 16px; right: 16px">
+            <div layout="row" layout-align="end center">
+              <div ng-repeat="(i, tool) in viewToolbarConfig">
+                <ng-md-icon  icon="{{tool.icon}}" ng-if="tool.icon" ng-click="viewToolbarFire(i)"></ng-md-icon>
+                <md-tooltip ng-if="tool.tip">
+                  {{tool.tip}}
+                </md-tooltip>
+              </div>
             </div>
           </md-toolbar-flexible-item>
         </md-toolbar-flexible>
