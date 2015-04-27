@@ -97,7 +97,7 @@ router.post('/login', function(req, res, next) {
 						console.log(err);
 					}
 					if(err || response.statusCode != 200) {
-						return cb({status: (response&&response.statusCode)||500, msg: body});
+						return cb({status: (response&&response.statusCode)||500, msg: (err&&err.message)||body});
 					} else {
 						return cb(null, body.id);
 					}
@@ -150,6 +150,29 @@ router.post('/login', function(req, res, next) {
 		res.json(results.info);
 	});
 	
+});
+
+router.get('/logout', function(req, res, next) {
+	req.session && req.session.destroy();
+	var step = config.logout;
+	if(step.rest) {
+		request.post({url: step.rest, form: req.body}, function(err, response, body) {
+			try {
+				var body = JSON.parse(body);
+			} catch(e) {
+				console.log(body);
+				console.log(err);
+			}
+			if(err || response.statusCode != 200) {
+				res.json({status: 'zafiro-only logged-out'});
+			} else {
+				res.json(body);
+			}
+			
+		});
+	} else {
+		res.json({status: 'zafiro-only logged-out'});
+	}
 });
 
 module.exports = router;

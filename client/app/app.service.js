@@ -71,14 +71,50 @@ angular.module('zafiro')
 
     var self = this;
 
-    this.$get = ['$http', '$soap',  function($http, $soap) {
+    this.$get = ['$http', '$soap', '$mdToast', function($http, $soap, $mdToast) {
       var viewToolbarConf = {};
       var viewToolbarConfListeners = [];
+      var loginListeners = [];
+      var loginState = false;
+      var toastDefaultOptions = {
+        templateUrl: 'views/toastTemplate.html',
+        controller: function($scope, type, content) {
+          $scope.content = content;
+          switch(type) {
+            case "error":
+              $scope.icon = 'error';
+              $scope.iconColor='red';
+              break;
+            case "warning":
+              $scope.icon = 'warning';
+              $scope.iconColor='yellow';
+              break;
+            default:
+              $scope.icon = 'info';
+              $scope.iconColor='blue';
+              break;
+          }
+          $scope.close = function() {
+            $mdToast.hide();
+          }
+        },
+        locals: {
+          type: 'info',
+          content: ''
+        },
+        position: "top left",
+        hideDelay: 3000
+      };
       return {
         ptr: {
           rest: 'default', 
           soap: 'default',
           socket: 'default'
+        },
+        toast: function(content, type) {
+          var ops = angular.extend({}, toastDefaultOptions, {locals: {content: content, type: type}});
+          $mdToast.show(ops);
+          return this;
         },
         set: function(name) {
           if(!name||angular.isString(name)) {
@@ -127,13 +163,13 @@ angular.module('zafiro')
           if(socket[this.ptr.io]) {
             return socket[this.ptr.io].on.apply(socket[this.ptr.io], Array.prototype.splice.call(arguments, 0))
           }
-          throw 'Socket not available';
+          this.toast('Socket not available', 'error');
         },
         emit: function() {
           if(socket[this.ptr.io]) {
             return socket[this.ptr.io].emit.apply(socket[this.ptr.io], Array.prototype.splice.call(arguments, 0))
           }
-          throw 'Socket not available';
+          this.toast('Socket not available', 'error');
         },
         call: function() {
           var url = wsdl[this.ptr.soap]||(/^https?:\/\/.+/.test(this.ptr.soap)&&this.ptr.soap)||false;
@@ -142,18 +178,41 @@ angular.module('zafiro')
             args.unshift(url);
             return $soap.get.apply($soap, args);
           }
-          throw 'Soap not available';
+          this.toast('Soap not available', 'error');
         },
-        login: function(params, success, error) {
+        login: function(params) {
           $http.post('/api/zafiro/login', params, {cache: false})
           .success(function(data) {
-            success&&success(data);
-            console.log(data);
+            loginState = data;
+            loginListeners.forEach(function(cb) {
+              cb(data);
+            });
           })
           .error(function(data) {
-            error&&error(data);
-            console.log(data);
-          });
+            this.toast(data||'Could not login', 'error');
+            loginState = false;
+            loginListeners.forEach(function(cb) {
+              cb(false);
+            });
+          }.bind(this));
+          return this;
+        },
+        logout: function() {
+          $http.post('/api/zafiro/logout', params, {cache: false})
+          .success(function(data) {
+            loginState = false;
+            loginListeners.forEach(function(cb) {
+              cb(false);
+            });
+          })
+          .error(function(data) {
+            this.toast(data||'Could not logout', 'error');
+          }.bind(this));
+          return this;
+        },
+        loginChanged: function(cb) {
+          loginListeners.push(cb)
+          loginState && cb(loginState);
           return this;
         },
         onSearch: function(fn) {

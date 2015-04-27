@@ -1,0 +1,9 @@
+<md-toast>
+	<div layout="row" style="width: 100%" layout-align="center center">
+		<ng-md-icon icon="{{icon}}" style="color: {{iconColor}}"></ng-md-icon>
+		<div class="toastContent" style="padding: 0px 5px" flex>
+			{{content}}
+		</div>
+		<ng-md-icon icon="close" ng-click="close()" style="cursor: pointer"></ng-md-icon>
+	</div>
+</md-toast>

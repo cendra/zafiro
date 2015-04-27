@@ -8,6 +8,9 @@ module.exports = {
 		returnParam: "returnUrl",
 		rest: "http://localhost:8089/api/login"
 	},
+	logout: {
+		rest: "http://localhost:8089/api/logout"
+	},
 	user: {
 		info: {
 			rest: "http://localhost:8089/api/account/:id:"

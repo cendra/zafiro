@@ -32,9 +32,9 @@
     <md-content layout="column" ng-controller="zafiroCtrl" style="height: 100%">
       <md-toolbar id="toolbar" layout="column" layout-align="start center">
         <div style="width: 100%; height: 96px" >
-          <div layout="row"  style="width: 100%; padding-right: 16px" layout-align="end center" layout-padding="15px">
-            <zafiro-search zfconfig="searchConfig" ngmodel="searchModel" (search)="search()"></zafiro-search>
-            <div ng-repeat="(i, tool) in toolbarConfig">
+          <div layout="row"  style="width: 100%; padding-right: 32px" layout-align="end center" layout-padding="15px">
+            <zafiro-search ng-if="searchConfig !== false" zfconfig="searchConfig" ngmodel="searchModel" (search)="search()"></zafiro-search>
+            <div ng-repeat="(i, tool) in toolbarConfig" style="padding-left: 16px">
               <ng-md-icon  icon="{{tool.icon}}" ng-if="tool.icon" ng-click="toolbarFire(i)"></ng-md-icon>
               <md-tooltip ng-if="tool.tip">
                 {{tool.tip}}
@@ -66,9 +66,9 @@
               <div style="font-size: 0.75em">{{currentApp.appDesc}}</div>
             </div>
           </md-toolbar-flexible-item>
-          <md-toolbar-flexible-item style="bottom: 16px; right: 16px">
+          <md-toolbar-flexible-item style="bottom: 16px; right: 32px">
             <div layout="row" layout-align="end center">
-              <div ng-repeat="(i, tool) in viewToolbarConfig">
+              <div ng-repeat="(i, tool) in viewToolbarConfig" style="padding-left: 16px">
                 <ng-md-icon  icon="{{tool.icon}}" ng-if="tool.icon" ng-click="viewToolbarFire(i)"></ng-md-icon>
                 <md-tooltip ng-if="tool.tip">
                   {{tool.tip}}
