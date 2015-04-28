@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('zafiro')
-.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $mdToast, $location, $http, zafiro) {
+.controller('zafiroCtrl', function($scope, $state, $mdSidenav, $mdToast, $location, $http, zafiro, $sce) {
 
     $http.get('/api/zafiro/organization')
     .success(function(data) {
@@ -10,6 +10,9 @@ angular.module('zafiro')
 
     zafiro
       .toolbarConfChanged(function(config) {
+        for(var i in config) {
+          if(config[i].template) config[i].template = $sce.trustAsHtml(config[i].template);
+        }
         $scope.toolbarConfig = config;
       })
       .viewToolbarConfChanged(function(config) {
@@ -20,10 +23,14 @@ angular.module('zafiro')
       });
 
     $scope.toolbarFire = function(key) {
-      $scope.toolbarConfig[key] && 
-      $scope.toolbarConfig[key].action && 
-      typeof $scope.toolbarConfig[key].action == 'function' && 
-      $scope.toolbarConfig[key].action();
+      if($scope.toolbarConfig[key]) {
+        if($scope.toolbarConfig[key].template || $scope.toolbarConfig[key].templateUrl) {
+          angular.element('#toolbar-'+key+'-collapse')[0].toggle();
+        } else if($scope.toolbarConfig[key].action && 
+          typeof $scope.toolbarConfig[key].action == 'function') {
+          $scope.toolbarConfig[key].action()
+        }
+      }
     };
 
     $scope.viewToolbarFire = function(key) {

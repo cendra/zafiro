@@ -35,10 +35,19 @@
           <div layout="row"  style="width: 100%; padding-right: 32px" layout-align="end center" layout-padding="15px">
             <zafiro-search ng-if="searchConfig !== false" zfconfig="searchConfig" ngmodel="searchModel" (search)="search()"></zafiro-search>
             <div ng-repeat="(i, tool) in toolbarConfig" style="padding-left: 16px">
-              <ng-md-icon  icon="{{tool.icon}}" ng-if="tool.icon" ng-click="toolbarFire(i)"></ng-md-icon>
+              <ng-md-icon  ng-if="tool.icon" icon="{{tool.icon}}" ng-click="toolbarFire(i)"></ng-md-icon>
+              <md-icon  ng-if="tool.src" md-svg-src="{{tool.src}}" ng-click="toolbarFire(i)"></md-icon>
               <md-tooltip ng-if="tool.tip">
                 {{tool.tip}}
               </md-tooltip>
+              <div ng-if="tool.template||tool.templateUrl" style="position: relative" ng-attr-ng-controller="tool.controller">
+                <core-collapse id="toolbar-{{i}}-collapse">
+                  <ng-include ng-if="tool.templateUrl" src="tool.templateUrl">
+                  </ng-include>
+                  <div ng-if="tool.template" ng-bind-html="tool.template">
+                  </div>
+                </core-collapse>
+              </div>
             </div>
           </div>
         </div>
