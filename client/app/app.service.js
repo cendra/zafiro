@@ -71,7 +71,7 @@ angular.module('zafiro')
 
     var self = this;
 
-    this.$get = ['$http', '$soap', '$mdToast', function($http, $soap, $mdToast) {
+    this.$get = ['$http', '$soap', '$mdToast', '$location', function($http, $soap, $mdToast, $location) {
       var viewToolbarConf = {};
       var viewToolbarConfListeners = [];
       var loginListeners = [];
@@ -110,6 +110,13 @@ angular.module('zafiro')
           rest: 'default', 
           soap: 'default',
           socket: 'default'
+        },
+        link: function(value) {
+          var app = $location.path().match(/^\/?([^\/]+)/);
+          if(app[1] && !new RegExp('^/app/'+app[1]+'/').test(value)) {
+            value = '/app/'+app[1]+'/'+value.replace(/^\/+/, '');
+          }
+          return value;
         },
         toast: function(content, type) {
           var ops = angular.extend({}, toastDefaultOptions, {locals: {content: content, type: type}});
